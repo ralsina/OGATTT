@@ -1,4 +1,4 @@
-
+#include <Arduino.h>
 #include "vtparse_table.h"
 
 char *ACTION_NAMES[] = {
@@ -38,7 +38,7 @@ char *STATE_NAMES[] = {
    "SOS_PM_APC_STRING",
 };
 
-state_change_t STATE_TABLE[14][256] = {
+const state_change_t STATE_TABLE[14][256] PROGMEM = {
   {  /* VTPARSE_STATE_CSI_ENTRY = 0 */
 /*0  */  VTPARSE_ACTION_EXECUTE            | (0                                 << 4),
 /*1  */  VTPARSE_ACTION_EXECUTE            | (0                                 << 4),

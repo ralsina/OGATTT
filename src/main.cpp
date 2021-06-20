@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <vtparse.h>
 //#include <Fonts/TomThumb.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -30,6 +31,13 @@ int to_print[2];
 byte cursor_x = 0;
 byte cursor_y = 0;
 
+vtparse_t parser;
+
+void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
+{
+  
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -49,6 +57,8 @@ void setup()
   display.setTextWrap(0);
   Serial.write('\n');
   pinMode(A0, INPUT_PULLUP);
+
+  vtparse_init(&parser, parser_callback);
 }
 
 void scroll_8px(void)
@@ -86,6 +96,10 @@ void draw_byte(char b)
   display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 1);
 }
 
+void handle_control_sequence(void) {
+
+}
+
 // int received = 0;
 void loop()
 {
@@ -94,7 +108,11 @@ void loop()
   int received = 0;
   while (Serial.available())
   {
-    draw_byte(Serial.read());
+    received = Serial.read();
+    if (received == 27 ) {  // ESC
+      handle_control_sequence();
+    }
+    draw_byte(received);
     received = 1;
   }
   if (received)

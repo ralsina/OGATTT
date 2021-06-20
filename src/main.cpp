@@ -24,19 +24,26 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SCREEN_COLS SCREEN_WIDTH / FONT_WIDTH
 #define SCREEN_ROWS SCREEN_HEIGHT / FONT_HEIGHT
 
-#define BUF_SIZE 128
-char inputBuffer[BUF_SIZE]; // for incoming serial data
 int to_print[2];
 
 byte cursor_x = 0;
 byte cursor_y = 0;
 
-vtparse_t parser;
+void draw_byte(char b);
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
 {
-  
+  switch (action)
+  {
+  case VTPARSE_ACTION_PRINT:
+    draw_byte(ch);
+    break;
+  default:
+    break;
+  };
 }
+
+vtparse_t parser;
 
 void setup()
 {
@@ -57,16 +64,16 @@ void setup()
   display.setTextWrap(0);
   Serial.write('\n');
   pinMode(A0, INPUT_PULLUP);
-
+  // Init VT parser
   vtparse_init(&parser, parser_callback);
 }
 
 void scroll_8px(void)
 {
   uint8_t *buf = display.getBuffer();
-  // Just copy each row of bytes up and blank the last one.
-  //
+  // Copy each row of bytes up
   memcpy(buf, buf + 128, 128 * 7);
+  // Blank the last line
   memset(buf + 128 * 7, 0, 128);
 }
 
@@ -78,7 +85,7 @@ void draw_byte(char b)
   display.setCursor(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT);
   display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
   display.print((char *)to_print);
-  //  Serial.print((char *)to_print);
+  Serial.print((char *)to_print);
 
   // Advance cursor
   cursor_x += 1;
@@ -96,33 +103,21 @@ void draw_byte(char b)
   display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 1);
 }
 
-void handle_control_sequence(void) {
+unsigned char b;
 
-}
-
-// int received = 0;
 void loop()
 {
   // read the incoming bytes:
   const char *toSend = 0;
-  int received = 0;
   while (Serial.available())
   {
-    received = Serial.read();
-    if (received == 27 ) {  // ESC
-      handle_control_sequence();
-    }
-    draw_byte(received);
-    received = 1;
+    b = Serial.read();
+    vtparse(&parser, &b, 1);
   }
-  if (received)
-  {
-    display.display();
-  }
+  display.display();
 
   // One-pin kbd handler
-  received = analogRead(A0);
-  switch (received)
+  switch (analogRead(A0))
   {
   case 105 ... 800:
     toSend = "\r\n";

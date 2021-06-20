@@ -126,13 +126,8 @@ static void do_state_change(vtparse_t *parser, state_change_t change, char ch)
     }
 }
 
-void vtparse(vtparse_t *parser, unsigned char *data, int len)
+void vtparse(vtparse_t *parser, unsigned char b)
 {
-    int i;
-    for (i = 0; i < len; i++)
-    {
-        unsigned char ch = data[i];
-        volatile state_change_t change = pgm_read_byte(STATE_TABLE[parser->state - 1][ch]);
-        do_state_change(parser, change, ch);
-    }
+    state_change_t change = pgm_read_byte(STATE_TABLE[parser->state - 1][b]);
+    do_state_change(parser, change, b);
 }

@@ -30,17 +30,28 @@ byte cursor_x = 0;
 byte cursor_y = 0;
 
 void draw_byte(char b);
+void csi_dispatch(char b);
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
 {
+  display.println(ACTION_NAMES[action]);
+
   switch (action)
   {
   case VTPARSE_ACTION_PRINT:
     draw_byte(ch);
     break;
+  case VTPARSE_ACTION_CSI_DISPATCH:
+    csi_dispatch(ch);
+    break;
   default:
     break;
   };
+}
+
+void csi_dispatch(char b)
+{
+  Serial.println(b);
 }
 
 vtparse_t parser;
@@ -82,14 +93,58 @@ void draw_byte(char b)
   to_print[0] = b;
   to_print[1] = 0;
 
-  display.setCursor(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT);
-  display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
-  display.print((char *)to_print);
-  Serial.print((char *)to_print);
+  // Handle Printable and control characters, see
+  // See https://vt100.net/docs/vt100-ug/chapter3.html
+  switch (b)
+  {
+  case 7: // BEL
+    // TODO
+    break;
+  case 8: // BS
+    if (cursor_x > 0)
+      cursor_x--;
+    break;
+  case 9: // HT
+    // TODO
+    break;
+  case 10: // LF
+  case 11:
+  case 12:
+    cursor_x = 0;
+    cursor_y++;
+    break;
+  case 13: // CR
+    cursor_x = 0;
+    break;
+  case 14: // SO
+    // TODO
+    break;
+  case 15: // SI
+    // TODO
+    break;
+  case 17: // XON
+    // TODO
+    break;
+  case 18: // XOFF
+    // TODO
+    break;
+  case 24: // CAN
+  case 26:
+    // TODO
+    break;
+  case 127: // DEL
+    break;
+  default: // Printable
+    display.setCursor(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT);
+    display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
+    display.print((char *)to_print);
+    Serial.print((char *)to_print);
+    // Advance cursor
+    cursor_x += 1;
+  }
 
-  // Advance cursor
-  cursor_x += 1;
-  if (b == 13 || cursor_x == SCREEN_COLS)
+  // Wrap / Scroll
+  if (cursor_x == SCREEN_COLS)
   {
     cursor_x = 0;
     cursor_y++;
@@ -112,9 +167,9 @@ void loop()
   while (Serial.available())
   {
     b = Serial.read();
-    vtparse(&parser, &b, 1);
+    vtparse(&parser, b);
+    display.display();
   }
-  display.display();
 
   // One-pin kbd handler
   switch (analogRead(A0))

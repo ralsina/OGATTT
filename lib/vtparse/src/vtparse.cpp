@@ -6,7 +6,6 @@
  * This code is in the public domain.
  */
 
-#include <avr/pgmspace.h>
 #include "vtparse.h"
 
 void vtparse_init(vtparse_t *parser, vtparse_callback_t cb)
@@ -91,12 +90,12 @@ static void do_action(vtparse_t *parser, vtparse_action_t action, char ch)
     }
 }
 
-static void do_state_change(vtparse_t *parser, state_change_t change, char ch)
+void do_state_change(vtparse_t *parser, uint8_p change, char ch)
 {
     /* A state change is an action and/or a new state to transition to. */
 
-    vtparse_state_t new_state = STATE(change);
-    vtparse_action_t action = ACTION(change);
+    vtparse_state_t new_state = (vtparse_state_t)STATE(change);
+    vtparse_action_t action = (vtparse_action_t)ACTION(change);
 
     if (new_state)
     {
@@ -124,10 +123,4 @@ static void do_state_change(vtparse_t *parser, state_change_t change, char ch)
     {
         do_action(parser, action, ch);
     }
-}
-
-void vtparse(vtparse_t *parser, unsigned char b)
-{
-    state_change_t change = pgm_read_byte(STATE_TABLE[parser->state - 1][b]);
-    do_state_change(parser, change, b);
 }

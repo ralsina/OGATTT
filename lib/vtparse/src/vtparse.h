@@ -9,11 +9,7 @@
 #ifndef VTPARSE_DOT_H
 #define VTPARSE_DOT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "vtparse_table.h"
+#include "vtparse_table.hpp"
 
 #define MAX_INTERMEDIATE_CHARS 2
 #define ACTION(state_change) (state_change & 0x0F)
@@ -35,10 +31,6 @@ typedef struct vtparse {
 } vtparse_t;
 
 void vtparse_init(vtparse_t *parser, vtparse_callback_t cb);
-void vtparse(vtparse_t *parser, unsigned char b);
-
-#ifdef __cplusplus
-}
-#endif
+void do_state_change(vtparse_t *parser, uint8_p change, char ch);
 
 #endif

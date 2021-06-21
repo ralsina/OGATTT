@@ -1,3 +1,5 @@
+#include <PGMWrap.h>
+
 typedef enum {
    VTPARSE_STATE_CSI_ENTRY = 1,
    VTPARSE_STATE_CSI_IGNORE = 2,
@@ -16,6 +18,7 @@ typedef enum {
 } vtparse_state_t;
 
 typedef enum {
+   VTPARSE_ACTION_NONE = 0,
    VTPARSE_ACTION_CLEAR = 1,
    VTPARSE_ACTION_COLLECT = 2,
    VTPARSE_ACTION_CSI_DISPATCH = 3,
@@ -33,10 +36,9 @@ typedef enum {
    VTPARSE_ACTION_ERROR = 15,
 } vtparse_action_t;
 
-typedef unsigned char state_change_t;
-extern const state_change_t STATE_TABLE[14][256];
+extern const uint8_p STATE_TABLE[14][256];
 extern vtparse_action_t ENTRY_ACTIONS[14];
 extern vtparse_action_t EXIT_ACTIONS[14];
-extern char *ACTION_NAMES[16];
-extern char *STATE_NAMES[15];
+extern const char *ACTION_NAMES[16];
+extern const char *STATE_NAMES[15];
 

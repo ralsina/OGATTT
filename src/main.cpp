@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <avr/pgmspace.h>
 #include <vtparse.h>
 //#include <Fonts/TomThumb.h>
 
@@ -34,7 +35,7 @@ void csi_dispatch(char b);
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
 {
-  display.println(ACTION_NAMES[action]);
+  Serial.println(ACTION_NAMES[action]);
 
   switch (action)
   {
@@ -137,8 +138,8 @@ void draw_byte(char b)
   default: // Printable
     display.setCursor(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT);
     display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
-    display.print((char *)to_print);
-    Serial.print((char *)to_print);
+    // display.print((char *)to_print);
+    // Serial.print((char *)to_print);
     // Advance cursor
     cursor_x += 1;
   }
@@ -167,7 +168,8 @@ void loop()
   while (Serial.available())
   {
     b = Serial.read();
-    vtparse(&parser, b);
+    uint8_p change = STATE_TABLE[parser.state - 1][b];
+    do_state_change(&parser, change, b);
     display.display();
   }
 

@@ -90,7 +90,7 @@ static void do_action(vtparse_t *parser, vtparse_action_t action, char ch)
     }
 }
 
-void do_state_change(vtparse_t *parser, uint8_p change, char ch)
+void do_state_change(vtparse_t *parser, uint8_t change, char ch)
 {
     /* A state change is an action and/or a new state to transition to. */
 

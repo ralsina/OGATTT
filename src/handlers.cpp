@@ -2,13 +2,12 @@
 #include <string.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <ArduinoLog.h>
 
 #include "handlers.h"
 #include "const.h"
 
 vtparse_t parser;
-
-int to_print[2];
 
 uint8_t cursor_x = 0;
 uint8_t cursor_y = 0;
@@ -22,12 +21,14 @@ void csi_dispatch(char b)
 
 void scroll_8px(void)
 {
-  uint8_t *buf = display.getBuffer();
-  // Copy each row of bytes up
-  memcpy(buf, buf + 128, 128 * 7);
-  // Blank the last line
-  memset(buf + 128 * 7, 0, 128);
+    uint8_t *buf = display.getBuffer();
+    // Copy each row of bytes up
+    memcpy(buf, buf + 128, 128 * 7);
+    // Blank the last line
+    memset(buf + 128 * 7, 0, 128);
 }
+
+char to_print[2];
 
 void handle_print(char b)
 {
@@ -35,7 +36,7 @@ void handle_print(char b)
     to_print[1] = 0;
 
     // Handle Printable and control characters, see
-    // See https://vt100.net/docs/vt100-ug/chapter3.html
+    // https://vt100.net/docs/vt100-ug/chapter3.html
     switch (b)
     {
     case 7: // BEL
@@ -101,6 +102,7 @@ void handle_print(char b)
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
 {
+    Serial.print("ACTION --> ");
     Serial.println(ACTION_NAMES[action]);
 
     switch (action)
@@ -114,4 +116,36 @@ void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char c
     default:
         break;
     };
+}
+
+void read_kbd(char *data)
+{
+    // One-pin kbd handler
+    switch (analogRead(A0))
+    {
+    case 105 ... 800:
+        strncpy(data, "\r\n\0", 3);
+        break;
+    case 75 ... 104:
+        strncpy(data, "r\0", 2);
+        break;
+    case 50 ... 74:
+        strncpy(data, "e\0", 2);
+        break;
+    case 30 ... 49:
+        strncpy(data, "w\0", 2);
+        break;
+    case 0 ... 29:
+        strncpy(data, "q\0", 2);
+        break;
+    }
+    delay(200); // Dummy debounce
+}
+
+void init_terminal(void)
+{
+    // Prepare 1-pin kbd
+    pinMode(A0, INPUT_PULLUP);
+    // Init VT parser
+    vtparse_init(&parser, parser_callback);
 }

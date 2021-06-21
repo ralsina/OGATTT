@@ -31,6 +31,6 @@ typedef struct vtparse {
 } vtparse_t;
 
 void vtparse_init(vtparse_t *parser, vtparse_callback_t cb);
-void do_state_change(vtparse_t *parser, uint8_p change, char ch);
+void do_state_change(vtparse_t *parser, uint8_t change, char ch);
 
 #endif

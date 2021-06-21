@@ -1,83 +1,64 @@
 #include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <avr/pgmspace.h>
-//#include <Fonts/TomThumb.h>
+#include <ArduinoLog.h>
 #include "handlers.h"
 #include "const.h"
 
-
-
-
 void setup()
 {
+  // // Initialize serial port
   Serial.begin(9600);
+  while (!Serial && !Serial.available())
+  {
+  };
   Serial.setTimeout(50);
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+
+  // Initialize screen
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
   {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;)
-      ; // Don't proceed, loop forever
+    {
+    }
   }
 
-  display.display();
-  display.clearDisplay();
-  //  display.setFont(&TomThumb);
+  // Graphical details
   display.setTextColor(1, 0);
   display.setTextWrap(0);
-  Serial.write('\n');
-  pinMode(A0, INPUT_PULLUP);
-  // Init VT parser
-  vtparse_init(&parser, parser_callback);
+  display.fillScreen(0);
+  display.display();
+
+  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  Log.infoln("LOGGING HERE");
+  display.display();
+  delay(500);
+  display.fillScreen(0);
+  display.display();
+
+  init_terminal();
 }
 
-
-
-unsigned char b;
+uint8_t b;
+char to_serial[3];
 
 void loop()
 {
   // read the incoming bytes:
-  const char *toSend = 0;
-  while (Serial.available())
+  while (Serial.available()>0)
   {
     b = Serial.read();
-    uint8_p change = STATE_TABLE[parser.state - 1][b];
-    Serial.print("==> ");
-    Serial.println(parser.state - 1);
-    Serial.print("==> ");
-    Serial.println(b);
-    Serial.print("==> ");
-    Serial.println(STATE_TABLE[parser.state - 1][b]);
+    // Log.infoln("state--> %d b---> %d", parser.state, b);
+    uint8_t change = pgm_read_byte(STATE_TABLE[parser.state - 1][b]);
     do_state_change(&parser, change, b);
     display.display();
   }
 
-  // One-pin kbd handler
-  switch (analogRead(A0))
+  memset(to_serial, 0, 3);
+  read_kbd(to_serial);
+  if (to_serial[0])
   {
-  case 105 ... 800:
-    toSend = "\r\n";
-    break;
-  case 75 ... 104:
-    toSend = "r";
-    break;
-  case 50 ... 74:
-    toSend = "e";
-    break;
-  case 30 ... 49:
-    toSend = "w";
-    break;
-  case 0 ... 29:
-    toSend = "q";
-    break;
-  }
-  if (toSend)
-  {
-    Serial.print(toSend);
-    delay(500); // Dummy debounce
+    Serial.write(to_serial, strlen(to_serial));
   }
 }

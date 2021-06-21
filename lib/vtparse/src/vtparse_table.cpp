@@ -38,7 +38,7 @@ const char *STATE_NAMES[] = {
     "SOS_PM_APC_STRING",
 };
 
-uint8_p STATE_TABLE[14][256] PROGMEM = {
+uint8_p STATE_TABLE[14][160] PROGMEM = {
     {
         /* VTPARSE_STATE_CSI_ENTRY = 0 */
         /*0  */ VTPARSE_ACTION_EXECUTE ,

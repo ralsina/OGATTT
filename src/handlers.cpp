@@ -19,22 +19,36 @@ void csi_dispatch(char b)
     Serial.println(b);
 }
 
-void scroll_8px(void)
+void scroll(int n)
 {
-    uint8_t *buf = display.getBuffer();
-    // Copy each row of bytes up
-    memcpy(buf, buf + 128, 128 * 7);
-    // Blank the last line
-    memset(buf + 128 * 7, 0, 128);
-}
+    /** Scroll n pixels. Only scrolls **UP**. */
 
-char to_print[2];
+    if (n == 0) // NOOP
+    {
+        return;
+    }
+
+    // How many whole bytes up
+    int n1 = n / 8;
+
+    if (n1 > SCREEN_HEIGHT / 8) // Everything scrolls off screen, just clear
+    {
+        display.clearDisplay();
+        return;
+    }
+
+    // Scroll whole bytes
+    uint8_t *buf = display.getBuffer();
+    memcpy(buf, buf + SCREEN_WIDTH * n1, SCREEN_WIDTH * (SCREEN_BUFFER_ROWS - n1));
+    // Clear bottom rows
+    memset(buf + SCREEN_WIDTH * (SCREEN_BUFFER_ROWS - n1), 0, SCREEN_WIDTH * n1);
+
+    // Scroll the top SCREEN_BUFFER_ROWS - n1 rows of bytes fractionally
+    // TODO
+}
 
 void handle_print(char b)
 {
-    to_print[0] = b;
-    to_print[1] = 0;
-
     // Handle Printable and control characters, see
     // https://vt100.net/docs/vt100-ug/chapter3.html
     switch (b)
@@ -43,6 +57,8 @@ void handle_print(char b)
         // TODO
         break;
     case 8: // BS
+        // Clear cursor
+        display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
         if (cursor_x > 0)
             cursor_x--;
         break;
@@ -52,11 +68,11 @@ void handle_print(char b)
     case 10: // LF
     case 11:
     case 12:
+    case 13: // CR
+        // Clear cursor
+        display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
         cursor_x = 0;
         cursor_y++;
-        break;
-    case 13: // CR
-        cursor_x = 0;
         break;
     case 14: // SO
         // TODO
@@ -77,10 +93,8 @@ void handle_print(char b)
     case 127: // DEL
         break;
     default: // Printable
-        display.setCursor(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT);
         display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
-        display.print((char *)to_print);
-        // Serial.print((char *)to_print);
+        display.drawChar(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, b, 1, 0, 1);
         // Advance cursor
         cursor_x += 1;
     }
@@ -93,7 +107,7 @@ void handle_print(char b)
     }
     if (cursor_y == SCREEN_ROWS)
     {
-        scroll_8px();
+        scroll(FONT_HEIGHT);
         cursor_y = SCREEN_ROWS - 1;
     }
     // Draw the cursor

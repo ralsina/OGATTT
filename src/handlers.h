@@ -8,4 +8,3 @@ void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char c
 void read_kbd(char *data);
 
 extern vtparse_t parser;
-extern Adafruit_SSD1306 display;

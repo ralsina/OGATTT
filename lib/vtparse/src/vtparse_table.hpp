@@ -1,4 +1,4 @@
-#include <PGMWrap.h>
+#include <stdint.h>
 
 typedef enum {
    VTPARSE_STATE_CSI_ENTRY = 1,

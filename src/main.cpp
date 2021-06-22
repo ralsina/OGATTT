@@ -1,10 +1,13 @@
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include "SSD1306Ascii.h"
+#include "SSD1306AsciiAvrI2c.h"
 #include <avr/pgmspace.h>
 #include <ArduinoLog.h>
 #include "handlers.h"
 #include "const.h"
+
+
+SSD1306AsciiAvrI2c oled;
 
 void setup()
 {
@@ -16,26 +19,13 @@ void setup()
   Serial.setTimeout(50);
 
   // Initialize screen
-  if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
-  {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;)
-    {
-    }
-  }
+  oled.begin(&Adafruit128x64, I2C_ADDRESS);
+  oled.setFont(Adafruit5x7);
+  oled.clear();
 
-  // Graphical details
-  display.setTextColor(1, 0);
-  display.setTextWrap(0);
-  display.fillScreen(0);
-  display.display();
-
-  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  // Initialize logging
+  Log.begin(LOG_LEVEL_VERBOSE, &oled);
   Log.infoln("LOGGING HERE");
-  display.display();
-  delay(500);
-  display.fillScreen(0);
-  display.display();
 
   init_terminal();
 }
@@ -46,13 +36,14 @@ char to_serial[3];
 void loop()
 {
   // read the incoming bytes:
-  while (Serial.available()>0)
+  while (Serial.available() > 0)
   {
     b = Serial.read();
-    // Log.infoln("state--> %d b---> %d", parser.state, b);
+    Log.infoln("BEFORE: %d %d", parser.state, b);
     uint8_t change = pgm_read_byte(STATE_TABLE[parser.state - 1][b]);
+    // Log.infoln("MIDDLE >>>> change: %d new_state: %d, action: %d", change, STATE(change), ACTION(change));
     do_state_change(&parser, change, b);
-    display.display();
+    Log.infoln("AFTER %d", parser.state);
   }
 
   memset(to_serial, 0, 3);

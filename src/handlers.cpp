@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <string.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <SSD1306AsciiAvrI2c.h>
 #include <ArduinoLog.h>
 
 #include "handlers.h"
@@ -12,39 +11,11 @@ vtparse_t parser;
 uint8_t cursor_x = 0;
 uint8_t cursor_y = 0;
 
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+extern SSD1306AsciiAvrI2c oled;
 
 void csi_dispatch(char b)
 {
     Serial.println(b);
-}
-
-void scroll(int n)
-{
-    /** Scroll n pixels. Only scrolls **UP**. */
-
-    if (n == 0) // NOOP
-    {
-        return;
-    }
-
-    // How many whole bytes up
-    int n1 = n / 8;
-
-    if (n1 > SCREEN_HEIGHT / 8) // Everything scrolls off screen, just clear
-    {
-        display.clearDisplay();
-        return;
-    }
-
-    // Scroll whole bytes
-    uint8_t *buf = display.getBuffer();
-    memcpy(buf, buf + SCREEN_WIDTH * n1, SCREEN_WIDTH * (SCREEN_BUFFER_ROWS - n1));
-    // Clear bottom rows
-    memset(buf + SCREEN_WIDTH * (SCREEN_BUFFER_ROWS - n1), 0, SCREEN_WIDTH * n1);
-
-    // Scroll the top SCREEN_BUFFER_ROWS - n1 rows of bytes fractionally
-    // TODO
 }
 
 void handle_print(char b)
@@ -58,7 +29,7 @@ void handle_print(char b)
         break;
     case 8: // BS
         // Clear cursor
-        display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
+        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
         if (cursor_x > 0)
             cursor_x--;
         break;
@@ -70,7 +41,7 @@ void handle_print(char b)
     case 12:
     case 13: // CR
         // Clear cursor
-        display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
+        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
         cursor_x = 0;
         cursor_y++;
         break;
@@ -93,8 +64,9 @@ void handle_print(char b)
     case 127: // DEL
         break;
     default: // Printable
-        display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 0);
-        display.drawChar(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, b, 1, 0, 1);
+        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
+        oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
+        oled.write(b);
         // Advance cursor
         cursor_x += 1;
     }
@@ -107,11 +79,11 @@ void handle_print(char b)
     }
     if (cursor_y == SCREEN_ROWS)
     {
-        scroll(FONT_HEIGHT);
+        oled.scrollDisplay(1);
         cursor_y = SCREEN_ROWS - 1;
     }
     // Draw the cursor
-    display.fillRect(cursor_x * FONT_WIDTH, cursor_y * FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, 1);
+    // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 1);
 }
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)

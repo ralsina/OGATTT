@@ -8,7 +8,7 @@ class Terminal
 {
 public:
     Terminal();
-    // char screen[SCREEN_COLS][SCREEN_ROWS];
+    // char screen[SCREEN_COLS][SCREEN_ROWS];  // Maybe not needed, we'll see
     char kbd_buffer[10];
     uint8_t cursor_x;
     uint8_t cursor_y;

@@ -1,9 +1,5 @@
 #include <Arduino.h>
-#include "SSD1306Ascii.h"
 #include <ArduinoLog.h>
-#include "handlers.h"
-#include "const.h"
-#include "vtparse_table.hpp"
 #include "terminal.h"
 
 Terminal term;

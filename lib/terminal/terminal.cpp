@@ -245,25 +245,15 @@ void Terminal::handle_print(uint8_t b)
     switch (b)
     {
     case 7: // BEL
-        // TODO
         break;
     case 8: // BS
-        // Clear cursor
-        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-        if (cursor_x > 0)
-            cursor_x--;
         break;
     case 9: // HT
-        // TODO
         break;
     case 10: // LF
     case 11:
     case 12:
     case 13: // CR
-        // Clear cursor
-        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-        cursor_x = 0;
-        cursor_y++;
         break;
     case 14: // SO
         // TODO
@@ -272,14 +262,11 @@ void Terminal::handle_print(uint8_t b)
         // TODO
         break;
     case 17: // XON
-        // TODO
         break;
     case 18: // XOFF
-        // TODO
         break;
     case 24: // CAN
     case 26:
-        // TODO
         break;
     case 127: // DEL
         break;

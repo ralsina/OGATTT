@@ -6,6 +6,9 @@
 
 Terminal::Terminal()
 {
+    //Clear screen buffer
+    memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
+
     // Prepare 1-pin kbd
     pinMode(A0, INPUT_PULLUP);
     // Init VT parser
@@ -52,16 +55,28 @@ void Terminal::read_kbd()
     delay(200); // FIXME: Dummy debounce
 }
 
-
 void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
 {
-    Log.infoln("ACTION: %s C: %d\r", ACTION_NAMES[action], ch);
+    int i;
+    Log.infoln("ACTION: %s '%c'\r", ACTION_NAMES[action], ch);
+    Log.infoln("%d Intermediate chars:\r", parser.num_intermediate_chars);
+    for (i = 0; i < parser.num_intermediate_chars; i++)
+    {
+        Log.infoln("\t0x%02x ('%c')\r", parser.intermediate_chars[i], parser.intermediate_chars[i]);
+    }
+    Log.infoln("%d Parameters:\r", parser.num_params);
+    for (i = 0; i < parser.num_params; i++)
+    {
 
+        Log.infoln("\t%d\r", parser.params[i]);
+    }
     switch (action)
     {
     case VTPARSE_ACTION_PRINT:
         handle_print(ch);
         break;
+    case VTPARSE_ACTION_CSI_DISPATCH:
+        handle_csi_dispatch(ch);
     default:
         break;
     };
@@ -175,6 +190,54 @@ void Terminal::do_action(vtparse_action_t action, uint8_t ch)
     }
 }
 
+void Terminal::handle_csi_dispatch(uint8_t b)
+{
+    switch (b)
+    {
+    case 'K':                                       // Erase line
+    case 'J':                                       // Erase screen
+        if (parser.num_params and parser.params[0]) // Should be only 0 or 1
+        {                                           // Assume 1 param
+            if (parser.params[0] == 1)
+            {
+                clear(0, cursor_x, cursor_y, cursor_y); // Clear from start of line
+                if (b == 'J')
+                { // Also clear from start of screen
+                    clear(0, SCREEN_COLS, 0, cursor_y - 1);
+                }
+            }
+            else
+            {                                              // Assume param is 2
+                clear(0, SCREEN_COLS, cursor_y, cursor_y); // Clear whole line
+                if (b == 'J')
+                {
+                    oled.clear(); // Clear whole screen
+                }
+            }
+        }
+        else // Assume 0 params or 1 param that's 0
+        {    // Erase to EOL
+            if (b == 'J')
+            {
+                // Also clear to end of screen
+                clear(0, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
+            }
+            else
+            {
+                clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y); // Clear to EOL
+            }
+        }
+        break;
+    default:
+        Log.infoln("Unknown CSI character %c\r", b);
+    }
+}
+
+void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2)
+{
+    oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX, y1, y2);
+}
+
 void Terminal::handle_print(uint8_t b)
 {
     // Handle Printable and control characters, see
@@ -224,6 +287,7 @@ void Terminal::handle_print(uint8_t b)
         // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
         oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
         oled.write(b);
+        screen[cursor_x][cursor_y] = b;
         // Advance cursor
         cursor_x += 1;
     }

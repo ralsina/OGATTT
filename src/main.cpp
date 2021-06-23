@@ -16,6 +16,7 @@ void setup()
   // Initialize logging
   // Can log to &Serial or &term.oled
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  Log.infoln("Terminal Ready: %dx%d\r", SCREEN_COLS, SCREEN_ROWS);
 }
 
 void loop()

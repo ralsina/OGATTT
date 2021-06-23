@@ -15,7 +15,7 @@ extern SSD1306AsciiAvrI2c oled;
 
 void csi_dispatch(char b)
 {
-    Serial.println(b);
+    // Serial.println(b);
 }
 
 void handle_print(char b)
@@ -79,17 +79,17 @@ void handle_print(char b)
     }
     if (cursor_y == SCREEN_ROWS)
     {
-        oled.scrollDisplay(1);
+        oled.scrollDisplay(8);
         cursor_y = SCREEN_ROWS - 1;
     }
     // Draw the cursor
-    // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 1);
+    oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
+    oled.write(178);
 }
 
 void parser_callback(vtparse_t *parser, vtparse_action_t action, unsigned char ch)
 {
-    Serial.print("ACTION --> ");
-    Serial.println(ACTION_NAMES[action]);
+    Log.infoln("ACTION: %s C: %d\r", ACTION_NAMES[action], ch);
 
     switch (action)
     {

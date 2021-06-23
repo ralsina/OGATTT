@@ -1,5 +1,8 @@
 #include <stdint.h>
 
+#ifndef VTPARSE_TABLE__H
+#define VTPARSE_TABLE__H
+
 typedef enum {
    VTPARSE_STATE_CSI_ENTRY = 1,
    VTPARSE_STATE_CSI_IGNORE = 2,
@@ -36,9 +39,10 @@ typedef enum {
    VTPARSE_ACTION_ERROR = 15,
 } vtparse_action_t;
 
-extern const uint8_t STATE_TABLE[14][160];
+extern const uint8_t STATE_TABLE[];
 extern vtparse_action_t ENTRY_ACTIONS[14];
 extern vtparse_action_t EXIT_ACTIONS[14];
 extern const char *ACTION_NAMES[16];
 extern const char *STATE_NAMES[15];
 
+#endif // VTPARSE_TABLE__H

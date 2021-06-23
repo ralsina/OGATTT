@@ -5,7 +5,7 @@
 #include <ArduinoLog.h>
 #include "handlers.h"
 #include "const.h"
-
+#include "vtparse_table.hpp"
 
 SSD1306AsciiAvrI2c oled;
 
@@ -24,10 +24,11 @@ void setup()
   oled.clear();
 
   // Initialize logging
-  Log.begin(LOG_LEVEL_VERBOSE, &oled);
-  Log.infoln("LOGGING HERE");
-
+  // Can log to &Serial or &oled
+  Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  Log.infoln("LOGGING GOES HERE\r\r");
   init_terminal();
+  Log.infoln("INITIAL: %s\r", STATE_NAMES[parser.state]);
 }
 
 uint8_t b;
@@ -39,11 +40,13 @@ void loop()
   while (Serial.available() > 0)
   {
     b = Serial.read();
-    Log.infoln("BEFORE: %d %d", parser.state, b);
-    uint8_t change = pgm_read_byte(STATE_TABLE[parser.state - 1][b]);
-    // Log.infoln("MIDDLE >>>> change: %d new_state: %d, action: %d", change, STATE(change), ACTION(change));
+    Log.infoln("BEFORE: %s %d\r", STATE_NAMES[parser.state], b);
+    uint8_t change = pgm_read_byte(STATE_TABLE + (parser.state - 1) * 160 + b);
+    Log.infoln(
+        "MIDDLE: new_state: %s, action: %s\r",
+        STATE_NAMES[STATE(change)], ACTION_NAMES[ACTION(change)]);
     do_state_change(&parser, change, b);
-    Log.infoln("AFTER %d", parser.state);
+    Log.infoln("AFTER %s\r", STATE_NAMES[parser.state]);
   }
 
   memset(to_serial, 0, 3);
@@ -52,4 +55,5 @@ void loop()
   {
     Serial.write(to_serial, strlen(to_serial));
   }
+  delay(1000);
 }

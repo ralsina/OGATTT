@@ -20,13 +20,40 @@ Terminal::Terminal()
     oled.clear();
 }
 
-void Terminal::process(unsigned char c)
+void Terminal::process(uint8_t c)
 {
     uint8_t change = pgm_read_byte(STATE_TABLE + (parser.state - 1) * 160 + c);
     do_state_change(change, c);
 }
 
-void Terminal::parser_callback(vtparse_action_t action, unsigned char ch)
+void Terminal::read_kbd()
+{
+    // Read keyboard event, put data in kbd_buffer
+
+    // One-pin kbd handler
+    switch (analogRead(A0))
+    {
+    case 105 ... 800:
+        strncpy(kbd_buffer, "\r\n\0", 3);
+        break;
+    case 75 ... 104:
+        strncpy(kbd_buffer, "r\0", 2);
+        break;
+    case 50 ... 74:
+        strncpy(kbd_buffer, "e\0", 2);
+        break;
+    case 30 ... 49:
+        strncpy(kbd_buffer, "w\0", 2);
+        break;
+    case 0 ... 29:
+        strncpy(kbd_buffer, "q\0", 2);
+        break;
+    }
+    delay(200); // FIXME: Dummy debounce
+}
+
+
+void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
 {
     Log.infoln("ACTION: %s C: %d\r", ACTION_NAMES[action], ch);
 
@@ -40,7 +67,7 @@ void Terminal::parser_callback(vtparse_action_t action, unsigned char ch)
     };
 }
 
-void Terminal::do_state_change(uint8_t change, char ch)
+void Terminal::do_state_change(uint8_t change, uint8_t ch)
 {
     /* A state change is an action and/or a new state to transition to. */
 
@@ -75,7 +102,7 @@ void Terminal::do_state_change(uint8_t change, char ch)
     }
 }
 
-void Terminal::do_action(vtparse_action_t action, char ch)
+void Terminal::do_action(vtparse_action_t action, uint8_t ch)
 {
     /* Some actions we handle internally (like parsing parameters), others
      * we hand to our client for processing */
@@ -148,7 +175,7 @@ void Terminal::do_action(vtparse_action_t action, char ch)
     }
 }
 
-void Terminal::handle_print(char b)
+void Terminal::handle_print(uint8_t b)
 {
     // Handle Printable and control characters, see
     // https://vt100.net/docs/vt100-ug/chapter3.html

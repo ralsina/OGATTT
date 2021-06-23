@@ -9,17 +9,19 @@ class Terminal
 public:
     Terminal();
     char screen[SCREEN_COLS][SCREEN_ROWS];
-    unsigned char cursor_x;
-    unsigned char cursor_y;
+    char kbd_buffer[10];
+    uint8_t cursor_x;
+    uint8_t cursor_y;
     vtparse_t parser;
     SSD1306AsciiAvrI2c oled;
 
-    void process(unsigned char c);
+    void process(uint8_t c);
+    void read_kbd();
 
-    void do_action(vtparse_action_t action, char ch);
-    void do_state_change(uint8_t change, char ch);
-    void handle_print(char b);
-    void parser_callback(vtparse_action_t action, unsigned char ch);
+    void do_action(vtparse_action_t action, uint8_t ch);
+    void do_state_change(uint8_t change, uint8_t ch);
+    void handle_print(uint8_t b);
+    void parser_callback(vtparse_action_t action, uint8_t ch);
 };
 
 #endif // TERMINAL__H

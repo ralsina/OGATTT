@@ -17,14 +17,10 @@ void setup()
   };
   Serial.setTimeout(50);
 
-
   // Initialize logging
   // Can log to &Serial or &term.oled
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
 }
-
-uint8_t b;
-char to_serial[3];
 
 void loop()
 {
@@ -34,10 +30,9 @@ void loop()
     term.process(Serial.read());
   }
 
-  memset(to_serial, 0, 3);
-  read_kbd(to_serial);
-  if (to_serial[0])
+  term.read_kbd();
+  if (term.kbd_buffer[0])
   {
-    Serial.write(to_serial, strlen(to_serial));
+    Serial.write(term.kbd_buffer, strlen(term.kbd_buffer));
   }
 }

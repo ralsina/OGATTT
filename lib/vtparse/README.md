@@ -6,7 +6,11 @@ I have shamelessly:
 
 * Copied the code
 * Include the generated tables directly
-* Remvoed the ruby code to generate the tables
+* Removed the ruby code that generates the tables
+* Merged a lot of vtparse.c into this project's terminal class for simplicty
+
+Thanks Joshua Haberman for making this code public domain! I could
+not have gotten this working without it!
 
 Below is the original README
 

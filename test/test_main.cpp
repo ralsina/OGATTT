@@ -150,6 +150,67 @@ void test_clear_whole_line(void)
 
 }
 
+void test_clear_line_left_of_cursor(void)
+{
+    Terminal term;
+    term.cursor_y = 4;
+    term.process_string("1234567890");
+    term.cursor_y = 5;
+    term.cursor_x = 0;
+    term.process_string("1234567890");
+    // Clear first 5 chars of line 4
+    term.cursor_y = 4;
+    term.cursor_x = 5;
+    term.process_string("\x1B[1K");
+
+    // First 5 chars cleared
+    for (int x = 0; x < 5; x++)
+    {
+        TEST_ASSERT_EQUAL(0, term.screen[x][4]);
+    }
+    // To the right, not cleared
+    for (int x = 5; x < 10; x++)
+    {
+        TEST_ASSERT_NOT_EQUAL(0, term.screen[x][4]);
+    }
+    // Next row, not cleared
+    for (int x = 0; x < 10; x++)
+    {
+        TEST_ASSERT_NOT_EQUAL(0, term.screen[x][5]);
+    }
+}
+
+void test_clear_line_right_of_cursor(void)
+{
+    Terminal term;
+    term.cursor_y = 4;
+    term.process_string("1234567890");
+    term.cursor_y = 5;
+    term.cursor_x = 0;
+    term.process_string("1234567890");
+    // Clear first 5 chars of line 4
+    term.cursor_y = 4;
+    term.cursor_x = 5;
+    term.process_string("\x1B[0K");
+
+    // First 5 chars not cleared
+    for (int x = 0; x < 5; x++)
+    {
+        TEST_ASSERT_NOT_EQUAL(0, term.screen[x][4]);
+    }
+    // To the right, cleared
+    for (int x = 5; x < SCREEN_COLS; x++)
+    {
+        TEST_ASSERT_EQUAL(0, term.screen[x][4]);
+    }
+    // Next row, not cleared
+    for (int x = 0; x < 10; x++)
+    {
+        TEST_ASSERT_NOT_EQUAL(0, term.screen[x][5]);
+    }
+}
+
+
 void setup()
 {
     UNITY_BEGIN();
@@ -160,14 +221,16 @@ void setup()
     RUN_TEST(test_print_follows_cursor);
     RUN_TEST(test_process_printable);
 
-    // // Screen handling
+    // Screen handling
     RUN_TEST(test_scroll);
     RUN_TEST(test_fill_screen);
     RUN_TEST(test_overflow_wraps);
 
-    // // Screen clearing
+    // Screen clearing
     RUN_TEST(test_clear_whole_screen);
     RUN_TEST(test_clear_whole_line);
+    RUN_TEST(test_clear_line_left_of_cursor);
+    RUN_TEST(test_clear_line_right_of_cursor);
 }
 
 void loop()

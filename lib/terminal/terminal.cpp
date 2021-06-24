@@ -243,14 +243,14 @@ void Terminal::handle_csi_dispatch(uint8_t b)
 
 void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2)
 {
-    for (uint8_t x = max(x1, 0); x < min(x2 + 1, SCREEN_COLS); x++)
+    for (uint8_t x = max(x1, 0); x < min(x2, SCREEN_COLS); x++)
     {
         for (uint8_t y = max(y1, 0); y < min(y2 + 1, SCREEN_ROWS); y++)
         {
             screen[x][y] = 0;
         }
     }
-    oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX, y1, y2);
+    oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX - 1, y1, y2);
 }
 
 void Terminal::handle_print(uint8_t b)

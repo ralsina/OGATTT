@@ -286,6 +286,16 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         {
         }
         break;
+    case 'n': // Reports
+        switch (p0)
+        {
+        case 6:                    // CPR - Cursor position report
+            break;                 // TODO, reply with ESC [ cursor_y; cursor_x R
+        case 5:                    // Status Report
+            Serial.write("\e[0n"); // Terminal ok
+            break;
+        }
+        break;
     case 'q': // DECLL - Load LEDS (DEC Private)
         // Partial implementation, L1 reacts
         // to any of L1-L4 being turned on

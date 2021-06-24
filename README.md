@@ -152,6 +152,12 @@ This will probably never be implement fully everything a terminal should support
 * DECSTBM - Set Top and Bottom Margins (DEC Private)
 * HTS – Horizontal Tabulation Set
 * RI - Reverse Index (Needs "scroll down" implemented)
+* RM - Reset Mode (modes?)
+* SCS - Select Character set
+* SGR - blink/underscore/negative/bold - Not sure what can be implemented
+* TBC - Tabulation clear
+* CPR - Cursor Position Report (half-done)
+* Status Report  (half-done)
 
 ## Unit Testing
 

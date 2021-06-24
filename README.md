@@ -65,6 +65,26 @@ I: 	3
 I: Unknown CSI character A
 ```
 
+## Implemented Control Characters
+
+* NUL ✔
+* ENQ ✔
+* BEL ✔
+* BS  ✔
+* HT  ✔
+* LF
+* VT
+* FF
+* CR
+* SO
+* SI
+* XON
+* XOFF
+* CAN
+* SUB
+* ESC ✔
+* DEL ✔
+
 ## Implemented Control Sequences
 
 This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!) but I'll move forward even if slowly :-)

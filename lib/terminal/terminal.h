@@ -25,9 +25,9 @@ public:
     void parser_callback(vtparse_action_t action, uint8_t ch);
 
     // Action handlers
+    void handle_csi_dispatch(uint8_t b);
     void handle_print(uint8_t b);
     void handle_execute(uint8_t b);
-    void handle_csi_dispatch(uint8_t b);
 
     // Utility functions
     void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2);

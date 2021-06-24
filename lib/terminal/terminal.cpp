@@ -335,8 +335,8 @@ void Terminal::handle_execute(uint8_t b)
     case 8: // BS
         cursor_x = max(0, cursor_x - 1);
         break;
-    case 9: // HT
-        break;
+    case 9: // HT FIXME: Fixed tabs at multiples of 8
+        cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS) - 1;
     case 10: // LF
     case 11: // VT
     case 12: // FF

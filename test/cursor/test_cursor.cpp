@@ -28,12 +28,32 @@ void test_backspace(void)
     TEST_ASSERT_EQUAL(5, term.cursor_y);
 }
 
+void test_tab(void)
+{
+    // HT moves cursor_x to next multiple of 8
+
+    Terminal term;
+    term.cursor_x = 4;
+
+    term.process(9);
+    TEST_ASSERT_EQUAL(7, term.cursor_x);
+    term.process(9);
+    TEST_ASSERT_EQUAL(15, term.cursor_x);
+    term.process(9);
+    TEST_ASSERT_EQUAL(23, term.cursor_x);
+    term.process(9);
+    TEST_ASSERT_EQUAL(24, term.cursor_x);
+    term.process(9);
+    TEST_ASSERT_EQUAL(24, term.cursor_x);
+}
+
 void setup()
 {
     UNITY_BEGIN();
 
-    // Basic print support
+    // Control characters that move the cursor
     RUN_TEST(test_backspace);
+    RUN_TEST(test_tab);
 }
 
 void loop()

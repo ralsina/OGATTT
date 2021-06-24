@@ -193,6 +193,25 @@ void test_IND(void)
     TEST_ASSERT_EQUAL(0, term.screen[0][SCREEN_ROWS-1]);
 }
 
+void test_NEL(void)
+{
+    Terminal term;
+    // Fill screen with Es
+    term.process_string("\033#8");
+    term.cursor_x = 10;
+    // repeat IND SCREEN_ROWS times
+    for (int i=0; i<SCREEN_ROWS; i++)
+    {
+        TEST_ASSERT_EQUAL(i, term.cursor_y);
+        term.process_string("\033E");
+        TEST_ASSERT_EQUAL(i+1, term.cursor_y);
+        TEST_ASSERT_EQUAL(0, term.cursor_x);
+    }
+    // Cursor should be in last row
+    // Last row should be blank because we scrolled
+    TEST_ASSERT_EQUAL(0, term.screen[0][SCREEN_ROWS-1]);
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -207,6 +226,7 @@ void setup()
     RUN_TEST(test_CUP);
     RUN_TEST(test_DECSC_DECRC);
     RUN_TEST(test_IND);
+    RUN_TEST(test_NEL);
 }
 
 void loop()

@@ -104,6 +104,7 @@ This will probably never be implement fully everything a terminal should support
 * DECRC - ESC 8             Restore cursor position
 * IND - ESC D               Move cursor down, may scroll.
 * LNM                       Switch Line Feed/New Line Mode
+* NEL - ESC E               Move cursor down and to col 0 (may scroll)
 
 ### Erasing:
 

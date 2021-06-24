@@ -325,7 +325,10 @@ void Terminal::handle_esc_dispatch(uint8_t b)
         break;
     case 'D': // IND - Index
         cursor_y++;
-        Log.infoln("cursor_y: %d\r", cursor_y);
+        break;
+    case 'E': // NEL - Next Line
+        cursor_y++;
+        cursor_x = 0;
         break;
     default:
         Log.infoln("Unknown ESC_DISPATCH character %c\r", b);

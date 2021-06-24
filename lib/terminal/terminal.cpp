@@ -229,35 +229,29 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         cursor_y = min(max(pn, 0), SCREEN_ROWS);
         break;
 
-    case 'K':                                       // Erase line
-    case 'J':                                       // Erase screen
-        if (parser.num_params and parser.params[0]) // Should be only 0 or 1
-        {                                           // Assume 1 param
-            if (parser.params[0] == 1)
-            {
-                clear(0, cursor_x, cursor_y, cursor_y); // Clear from start of line
-                if (b == 'J')
-                { // Also clear from start of screen
-                    clear(0, SCREEN_COLS, 0, cursor_y - 1);
-                }
-            }
-            else
-            {                                              // Assume param is 2
-                clear(0, SCREEN_COLS, cursor_y, cursor_y); // Clear whole line
-                if (b == 'J')
-                {
-                    clear(0, SCREEN_COLS, 0, SCREEN_ROWS); // Clear whole screen
-                }
-            }
-        }
-        else // Assume 0 params or 1 param that's 0
-        {    // Erase to EOL
-            if (b == 'J')
-            {
-                // Also clear to end of screen
-                clear(0, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
-            }
-            clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y); // Clear to EOL
+    case 'J': // Erase screen
+        switch (pn)
+        {
+        case 0: // Clear to end of screen
+            clear(0, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
+            break;
+        case 1: // Clear from start of screen
+            clear(0, SCREEN_COLS, 0, cursor_y - 1);
+            break;
+        default: // 2 Clear whole screen
+            clear(0, SCREEN_COLS, 0, SCREEN_ROWS);
+        }  // Intentional no break
+    case 'K': // Erase line
+        switch (pn)
+        {
+        case 0: // Clear to EOL
+            clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
+            break;
+        case 1: // Clear from start of line
+            clear(0, cursor_x, cursor_y, cursor_y);
+            break;
+        default: // 2  Clear whole line
+            clear(0, SCREEN_COLS, cursor_y, cursor_y);
         }
         break;
     default:

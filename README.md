@@ -120,6 +120,7 @@ This will probably never be implement fully everything a terminal should support
 ### Misc
 
 * DECSCNM - ESC [ ? 5 h|l   set/unset inverse video
+* RIS - ESC c               reset
 
 ### Weird
 
@@ -150,6 +151,7 @@ This will probably never be implement fully everything a terminal should support
 
 * DECSTBM - Set Top and Bottom Margins (DEC Private)
 * HTS – Horizontal Tabulation Set
+* RI - Reverse Index (Needs "scroll down" implemented)
 
 ## Unit Testing
 

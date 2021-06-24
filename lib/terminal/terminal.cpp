@@ -4,6 +4,8 @@
 
 #include "terminal.h"
 
+void (*resetFunc)(void) = 0;
+
 Terminal::Terminal()
 {
     //Clear screen buffer
@@ -305,6 +307,8 @@ void Terminal::handle_esc_dispatch(uint8_t b)
 {
     switch (b)
     {
+    case 'c': // RIS - Reset To Initial State
+        resetFunc();
     case '7': // DECSC - Save Cursor
         saved_cursor_x = cursor_x;
         saved_cursor_y = cursor_y;

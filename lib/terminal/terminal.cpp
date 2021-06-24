@@ -230,12 +230,13 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         cursor_x = max(0, cursor_x - max(1, p0));
         break;
 
+    case 'f': // HVP
     case 'H': // CUP – Cursor Position
         cursor_x = min(max(p1, 0), SCREEN_COLS);
         cursor_y = min(max(p0, 0), SCREEN_ROWS);
         break;
 
-    case 'J': // Erase screen
+    case 'J': // ED - Erase In Display
         switch (p0)
         {
         case 0: // Clear to end of screen
@@ -247,7 +248,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         default: // 2 Clear whole screen
             clear(0, SCREEN_COLS, 0, SCREEN_ROWS);
         }     // Intentional no break
-    case 'K': // Erase line
+    case 'K': // EK - Erase In Line
         switch (p0)
         {
         case 0: // Clear to EOL
@@ -313,6 +314,10 @@ void Terminal::handle_esc_dispatch(uint8_t b)
             cursor_x = saved_cursor_x;
             cursor_y = saved_cursor_y;
         }
+        break;
+    case 'D': // IND - Index
+        cursor_y++;
+        Log.infoln("cursor_y: %d\r", cursor_y);
         break;
     default:
         Log.infoln("Unknown ESC_DISPATCH character %c\r", b);

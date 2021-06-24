@@ -166,14 +166,31 @@ void test_DECSC_DECRC(void)
     Terminal term;
     term.cursor_x = 3;
     term.cursor_y = 4;
-    term.process_string("\x0b7");
+    term.process_string("\0337");
     TEST_ASSERT_EQUAL(3, term.saved_cursor_x);
     TEST_ASSERT_EQUAL(4, term.saved_cursor_y);
     term.cursor_x = 20;
     term.cursor_y = 2;
-    term.process_string("\x0b8");
+    term.process_string("\0338");
     TEST_ASSERT_EQUAL(3, term.cursor_x);
     TEST_ASSERT_EQUAL(4, term.cursor_y);
+}
+
+void test_IND(void)
+{
+    Terminal term;
+    // Fill screen with Es
+    term.process_string("\033#8");
+    // repeat IND SCREEN_ROWS times
+    for (int i=0; i<SCREEN_ROWS; i++)
+    {
+        TEST_ASSERT_EQUAL(i, term.cursor_y);
+        term.process_string("\033D");
+        TEST_ASSERT_EQUAL(i+1, term.cursor_y);
+    }
+    // Cursor should be in last row
+    // Last row should be blank because we scrolled
+    TEST_ASSERT_EQUAL(0, term.screen[0][SCREEN_ROWS-1]);
 }
 
 void setup()
@@ -189,6 +206,7 @@ void setup()
     RUN_TEST(test_CUF);
     RUN_TEST(test_CUP);
     RUN_TEST(test_DECSC_DECRC);
+    RUN_TEST(test_IND);
 }
 
 void loop()

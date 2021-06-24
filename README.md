@@ -102,17 +102,18 @@ This will probably never be implement fully everything a terminal should support
 * CUP - ESC [ Pn ; Pn H     Move cursor to specific position
 * DECSC - ESC 7             Save cursor position
 * DECRC - ESC 8             Restore cursor position
+* IND - ESC D               Move cursor down, may scroll.
 
 ### Erasing:
 
-*  ESC [ K           erase to end of line (inclusive)
-*  ESC [ 0 K         erase to end of line (inclusive)
-*  ESC [ 1 K         erase to beginning of line (inclusive)
+*  EK - ESC [ K           erase to end of line (inclusive)
+*  EK - ESC [ 0 K         erase to end of line (inclusive)
+*  EK - ESC [ 1 K         erase to beginning of line (inclusive)
 *  ESC [ 2 K         erase entire line (cursor doesn't move)
-*  ESC [ J           erase to end of screen (inclusive)
-*  ESC [ 0 J         erase to end of screen (inclusive)
-*  ESC [ 1 J         erase to beginning of screen (inclusive)
-*  ESC [ 2 J         erase entire screen (cursor doesn't move)
+*  ED - ESC [ J           erase to end of screen (inclusive)
+*  ED - ESC [ 0 J         erase to end of screen (inclusive)
+*  ED - ESC [ 1 J         erase to beginning of screen (inclusive)
+*  ED - ESC [ 2 J         erase entire screen (cursor doesn't move)
 
 ### Misc
 
@@ -140,9 +141,13 @@ This will probably never be implement fully everything a terminal should support
 * DECREPTPARM
 * DECREPQTPARM
 * DECSCLM
+* DECSWL
+* DECTST
 
 ### Need Research
 
+* DECSTBM - Set Top and Bottom Margins (DEC Private)
+* HTS – Horizontal Tabulation Set
 
 ## Unit Testing
 

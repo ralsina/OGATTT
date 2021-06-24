@@ -91,7 +91,9 @@ This will probably never be implement fully everything a terminal should support
 
 ### Cursor movement
 
-* ESC [ Pn D          Move Pn to the left (or to left margin)
+* ESC [ Pn D          Move cursor Pn to the left (up to left margin)
+* ESC [ Pn B          Move cursor Pn down (up to bottom margin)
+
 
 ### Erasing:
 

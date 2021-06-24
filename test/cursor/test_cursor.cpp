@@ -69,8 +69,9 @@ void test_lf(void)
     // TEST_ASSERT_EQUAL(SCREEN_ROWS - 1, term.cursor_y);
 }
 
-void test_cud(void)
+void test_CUB(void)
 {
+    // Cursor Backwards
     Terminal term;
     term.cursor_x = 10;
     term.process_string("\x1B[3D"); // 3 back
@@ -84,6 +85,22 @@ void test_cud(void)
     TEST_ASSERT_EQUAL(0, term.cursor_x);
 }
 
+void test_CUD(void)
+{
+    // Cursor Down
+    Terminal term;
+    term.cursor_y = 2;
+    term.process_string("\x1B[3B"); // 3 down
+    TEST_ASSERT_EQUAL(5, term.cursor_y);
+    term.process_string("\x1B[B"); // 0 down means 1 down
+    TEST_ASSERT_EQUAL(6, term.cursor_y);
+    term.process_string("\x1B[1B"); // 1 down
+    TEST_ASSERT_EQUAL(7, term.cursor_y);
+    // Doesn't go more than SCREEN_ROWS - 1
+    term.process_string("\x1B[9B"); // 9 down
+    TEST_ASSERT_EQUAL(SCREEN_ROWS -1, term.cursor_y);
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -92,7 +109,8 @@ void setup()
     RUN_TEST(test_backspace);
     RUN_TEST(test_tab);
     RUN_TEST(test_lf);
-    RUN_TEST(test_cud);
+    RUN_TEST(test_CUB);
+    RUN_TEST(test_CUD);
 }
 
 void loop()

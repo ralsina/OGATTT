@@ -207,12 +207,15 @@ void Terminal::handle_csi_dispatch(uint8_t b)
 {
     uint8_t pn;
     // Shortcut for sequences with a single parameter
-    pn = parser.num_params ? parser.params[0] : 0; 
+    pn = parser.num_params ? parser.params[0] : 0;
 
     switch (b)
     {
-    case 'D':  // CUB - Cursor Backwards
+    case 'D': // CUB - Cursor Backwards
         cursor_x = max(0, cursor_x - max(1, pn));
+        break;
+    case 'B': // CUB - Cursor Backwards
+        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, pn));
         break;
     case 'K':                                       // Erase line
     case 'J':                                       // Erase screen

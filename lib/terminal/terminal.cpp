@@ -265,8 +265,12 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         break;
     case 'h':
     case 'l':
-        if (parser.intermediate_chars[0] == '?')
+        switch (parser.intermediate_chars[0])
         {
+        case '2':
+            lnm = b == 'h';
+            break;
+        case '?':
             switch (p0)
             {
             case 5:
@@ -274,6 +278,10 @@ void Terminal::handle_csi_dispatch(uint8_t b)
                 oled.invertDisplay(b == 'h');
                 break;
             }
+            break;
+        }
+        if (parser.intermediate_chars[0] == '?')
+        {
         }
         break;
     case 'q': // DECLL - Load LEDS (DEC Private)
@@ -425,10 +433,14 @@ void Terminal::handle_execute(uint8_t b)
         break;
     case 9: // HT FIXME: Fixed tabs at multiples of 8
         cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS) - 1;
-    case 10: // LF  FIXME: See "New Line Mode"
+    case 10: // LF
     case 11: // VT
     case 12: // FF
         cursor_y += 1;
+        if (lnm)
+        {
+            cursor_x = 0;
+        }
         break;
     case 13: // CR
         cursor_x = 0;

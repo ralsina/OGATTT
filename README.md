@@ -103,6 +103,7 @@ This will probably never be implement fully everything a terminal should support
 * DECSC - ESC 7             Save cursor position
 * DECRC - ESC 8             Restore cursor position
 * IND - ESC D               Move cursor down, may scroll.
+* LNM                       Switch Line Feed/New Line Mode
 
 ### Erasing:
 

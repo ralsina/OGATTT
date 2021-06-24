@@ -17,6 +17,11 @@ public:
     vtparse_t parser;
     SSD1306AsciiAvrI2c oled; // FIXME: maybe take as argument
 
+    // Terminal state flags
+
+    bool lnm = false; // false is "reset/line feed"
+                      // true is "set/new line"
+
     // I/O handlers
     void process(uint8_t c);
     void read_kbd();
@@ -33,12 +38,12 @@ public:
     void handle_execute(uint8_t b);
 
     // Utility functions
-    void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c=0);
+    void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c = 0);
     void scroll(uint8_t rows);
     void refresh(void);
 
     // Debugging only
-    void process_string(const char s[]);  
+    void process_string(const char s[]);
 };
 
 #endif // TERMINAL__H

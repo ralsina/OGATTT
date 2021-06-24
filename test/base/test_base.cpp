@@ -111,13 +111,22 @@ void test_fill_screen(void)
 void test_clear(void)
 {
     Terminal term;
-    term.process_string("\x1b#8");  // Fills screen with E
+    term.process_string("\x1b#8"); // Fills screen with E
     // Compares per column
     for (int i = 0; i < SCREEN_COLS; i++)
     {
         TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term.screen[i], 8);
     }
-    
+}
+
+void test_nlm(void)
+{
+    Terminal term;
+    TEST_ASSERT_EQUAL(false, term.lnm);
+    term.process_string("\033[20h");
+    TEST_ASSERT_EQUAL(true, term.lnm);
+    term.process_string("\033[20l");
+    TEST_ASSERT_EQUAL(false, term.lnm);
 }
 
 void setup()

@@ -158,6 +158,7 @@ This will probably never be implement fully everything a terminal should support
 * TBC - Tabulation clear
 * CPR - Cursor Position Report (half-done)
 * Status Report  (half-done)
+* What Are You
 
 ## Unit Testing
 
@@ -171,3 +172,12 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 * [VT100 User Guide](https://vt100.net/docs/vt100-ug/)
 * [Line wrapping semantics](https://github.com/mattiase/wraptest)  (have not tried to follow it yet)
 * [VT100 Escape Codes](https://www.cs.csub.edu/howto/vt100_escape_codes.html) has some the official manual doesn't say, like DECSCNM
+
+## Wiring
+
+### From the SDD1306 to the Arduino Nano
+
+* GND -> GND
+* VCC -> 5V
+* SCL -> A5
+* SDA -> A4

@@ -127,6 +127,60 @@ void test_clear_whole_screen(void)
     }
 }
 
+void test_clear_screen_from_beginning_to_cursor(void)
+{
+    Terminal term;
+    // Fill the screen
+    for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
+    {
+        uint8_t c = '0' + i / SCREEN_COLS;
+        term.process(c);
+        TEST_ASSERT_EQUAL(c, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+    }
+    term.cursor_x = 5;
+    term.cursor_y = 5;
+    // Clear the screen to the cursor
+    term.process_string("\x1B[1J");
+    for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
+    {
+        if (i < 5 * SCREEN_COLS + 5)
+        {
+            TEST_ASSERT_EQUAL(0, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+        }
+        else
+        {
+            TEST_ASSERT_NOT_EQUAL(0, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+        }
+    }
+}
+
+void test_clear_screen_from_cursor_to_end(void)
+{
+    Terminal term;
+    // Fill the screen
+    for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
+    {
+        uint8_t c = '0' + i / SCREEN_COLS;
+        term.process(c);
+        TEST_ASSERT_EQUAL(c, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+    }
+    term.cursor_x = 5;
+    term.cursor_y = 5;
+    // Clear the screen to the cursor
+    term.process_string("\x1B[0J");
+    for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
+    {
+        if (i < 5 * SCREEN_COLS + 5)
+        {
+            TEST_ASSERT_NOT_EQUAL(0, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+        }
+        else
+        {
+            TEST_ASSERT_EQUAL(0, term.screen[i % SCREEN_COLS][i / SCREEN_COLS]);
+        }
+    }
+}
+
 void test_clear_whole_line(void)
 {
     Terminal term;
@@ -147,7 +201,6 @@ void test_clear_whole_line(void)
     {
         TEST_ASSERT_NOT_EQUAL(0, term.screen[x][4]);
     }
-
 }
 
 void test_clear_line_left_of_cursor(void)
@@ -210,7 +263,6 @@ void test_clear_line_right_of_cursor(void)
     }
 }
 
-
 void setup()
 {
     UNITY_BEGIN();
@@ -228,6 +280,8 @@ void setup()
 
     // Screen clearing
     RUN_TEST(test_clear_whole_screen);
+    RUN_TEST(test_clear_screen_from_beginning_to_cursor);
+    RUN_TEST(test_clear_screen_from_cursor_to_end);
     RUN_TEST(test_clear_whole_line);
     RUN_TEST(test_clear_line_left_of_cursor);
     RUN_TEST(test_clear_line_right_of_cursor);

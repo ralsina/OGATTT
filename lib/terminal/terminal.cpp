@@ -230,10 +230,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
                 // Also clear to end of screen
                 clear(0, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
             }
-            else
-            {
-                clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y); // Clear to EOL
-            }
+            clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y); // Clear to EOL
         }
         break;
     default:

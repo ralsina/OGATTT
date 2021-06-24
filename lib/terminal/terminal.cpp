@@ -86,8 +86,10 @@ void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
         break;
     case VTPARSE_ACTION_EXECUTE:
         handle_execute(ch);
+        break;
     case VTPARSE_ACTION_CSI_DISPATCH:
         handle_csi_dispatch(ch);
+        break;
     default:
         break;
     };
@@ -320,7 +322,8 @@ void Terminal::handle_execute(uint8_t b)
     {
     case 0: // NUL Ignored on input (not stored in input buffer; see full duplex protocol).
         break;
-    case 5: // ENQ TODO
+    case 5: // ENQ
+        Serial.write("Hi There");
         break;
     case 7: // BEL
         // FIXME add a real LED or a beeper, the builtin LED is hidden behind the

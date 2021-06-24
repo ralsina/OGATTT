@@ -26,6 +26,7 @@ public:
 
     // Action handlers
     void handle_print(uint8_t b);
+    void handle_execute(uint8_t b);
     void handle_csi_dispatch(uint8_t b);
 
     // Utility functions

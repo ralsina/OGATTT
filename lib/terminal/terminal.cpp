@@ -25,6 +25,7 @@ Terminal::Terminal()
 
 void Terminal::process(uint8_t c)
 {
+    Log.infoln("Processing: %d\r", c);
     uint8_t change = pgm_read_byte(STATE_TABLE + (parser.state - 1) * 160 + c);
     do_state_change(change, c);
 }
@@ -66,7 +67,7 @@ void Terminal::read_kbd()
 void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
 {
     int i;
-    Log.infoln("ACTION: %s '%c'\r", ACTION_NAMES[action], ch);
+    Log.infoln("ACTION: %s -- %d '%c'\r", ACTION_NAMES[action], ch);
     Log.infoln("%d Intermediate chars:\r", parser.num_intermediate_chars);
     for (i = 0; i < parser.num_intermediate_chars; i++)
     {
@@ -83,6 +84,8 @@ void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
     case VTPARSE_ACTION_PRINT:
         handle_print(ch);
         break;
+    case VTPARSE_ACTION_EXECUTE:
+        handle_execute(ch);
     case VTPARSE_ACTION_CSI_DISPATCH:
         handle_csi_dispatch(ch);
     default:
@@ -254,47 +257,13 @@ void Terminal::handle_print(uint8_t b)
 {
     // Handle Printable and control characters, see
     // https://vt100.net/docs/vt100-ug/chapter3.html
-    switch (b)
-    {
-    case '7': // BEL
-        // FIXME add a real LED, the builtin one is hidden behind the
-        // power one and not noticeable
-        digitalWrite(13, HIGH);
-        delay(150);
-        digitalWrite(13, LOW);
-        break;
-    case 8: // BS
-        break;
-    case 9: // HT
-        break;
-    case 10: // LF
-    case 11:
-    case 12:
-    case 13: // CR
-        break;
-    case 14: // SO
-        // TODO
-        break;
-    case 15: // SI
-        // TODO
-        break;
-    case 17: // XON
-        break;
-    case 18: // XOFF
-        break;
-    case 24: // CAN
-    case 26:
-        break;
-    case 127: // DEL
-        break;
-    default: // Printable
-        // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-        oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
-        oled.write(b);
-        screen[cursor_x][cursor_y] = b;
-        // Advance cursor
-        cursor_x += 1;
-    }
+
+    // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
+    oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
+    oled.write(b);
+    screen[cursor_x][cursor_y] = b;
+    // Advance cursor
+    cursor_x += 1;
 
     // Wrap / Scroll
     if (cursor_x == SCREEN_COLS)
@@ -342,5 +311,50 @@ void Terminal::refresh(void)
             oled.setCursor(x, y);
             oled.write(screen[x][y]);
         }
+    }
+}
+
+void Terminal::handle_execute(uint8_t b)
+{
+    switch (b)
+    {
+    case 0: // NUL Ignored on input (not stored in input buffer; see full duplex protocol).
+        break;
+    case 5: // ENQ TODO
+        break;
+    case 7: // BEL
+        // FIXME add a real LED or a beeper, the builtin LED is hidden behind the
+        // power one and not noticeable
+        digitalWrite(13, HIGH);
+        delay(500);
+        digitalWrite(13, LOW);
+        break;
+    case 8: // BS
+        cursor_x = max(0, cursor_x - 1);
+        break;
+    case 9: // HT
+        break;
+    case 10: // LF
+    case 11: // VT
+    case 12: // FF
+    case 13: // CR
+        break;
+    case 14: // SO
+        // TODO
+        break;
+    case 15: // SI
+        // TODO
+        break;
+    case 17: // XON
+        break;
+    case 18: // XOFF
+        break;
+    case 24: // CAN
+    case 26:
+        break;
+    case 127: // DEL
+        break;
+    default:
+        Log.infoln("Unknown execute code: %d\r", b);
     }
 }

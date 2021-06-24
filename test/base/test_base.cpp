@@ -108,6 +108,17 @@ void test_fill_screen(void)
     TEST_ASSERT_EQUAL_STRING_LEN("0123456", term.screen[SCREEN_COLS - 1], 8);
 }
 
+void test_clear(void)
+{
+    Terminal term;
+    term.process_string("\x1b#8");  // Fills screen with E
+    // Compares per column
+    for (int i = 0; i < SCREEN_COLS; i++)
+    {
+        TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term.screen[i], 8);
+    }
+    
+}
 
 void setup()
 {
@@ -123,6 +134,7 @@ void setup()
     RUN_TEST(test_scroll);
     RUN_TEST(test_fill_screen);
     RUN_TEST(test_overflow_wraps);
+    RUN_TEST(test_clear);
 }
 
 void loop()

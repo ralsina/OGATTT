@@ -90,6 +90,9 @@ void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
     case VTPARSE_ACTION_CSI_DISPATCH:
         handle_csi_dispatch(ch);
         break;
+    case VTPARSE_ACTION_ESC_DISPATCH:
+        handle_esc_dispatch(ch);
+        break;
     default:
         break;
     };
@@ -240,7 +243,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
             break;
         default: // 2 Clear whole screen
             clear(0, SCREEN_COLS, 0, SCREEN_ROWS);
-        }  // Intentional no break
+        }     // Intentional no break
     case 'K': // Erase line
         switch (pn)
         {
@@ -254,21 +257,63 @@ void Terminal::handle_csi_dispatch(uint8_t b)
             clear(0, SCREEN_COLS, cursor_y, cursor_y);
         }
         break;
+    case 'c': // Device attributes (TODO)
+        break;
+    case '8': // DECALN (WTF)
+        // This command fills the entire screen area with uppercase Es for
+        // screen focus and alignment. This command is used by DEC manufacturing
+        // and Field Service personnel.
+        if (parser.intermediate_chars[0] == '#')
+        {
+
+            Log.infoln("DECALN\r");
+            delay(1000);
+            clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+        }
+        break;
     default:
         Log.infoln("Unknown CSI character %c\r", b);
     }
 }
 
-void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2)
+void Terminal::handle_esc_dispatch(uint8_t b)
+{
+    switch (b)
+    {
+    case '8': // DECALN (WTF)
+        // This command fills the entire screen area with uppercase Es for
+        // screen focus and alignment. This command is used by DEC manufacturing
+        // and Field Service personnel.
+        if (parser.intermediate_chars[0] == '#')
+        {
+
+            Log.infoln("DECALN\r");
+            delay(1000);
+            clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+        }
+        break;
+    default:
+        Log.infoln("Unknown ESC_DISPATCH character %c\r", b);
+    }
+}
+
+void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 {
     for (uint8_t x = max(x1, 0); x < min(x2, SCREEN_COLS); x++)
     {
         for (uint8_t y = max(y1, 0); y < min(y2 + 1, SCREEN_ROWS); y++)
         {
-            screen[x][y] = 0;
+            screen[x][y] = c;
         }
     }
-    oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX - 1, y1, y2);
+    if (c)
+    {
+        refresh();
+    }
+    else
+    {
+        oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX - 1, y1, y2);
+    }
 }
 
 void Terminal::handle_print(uint8_t b)
@@ -326,7 +371,7 @@ void Terminal::refresh(void)
     {
         for (uint8_t y = 0; y < SCREEN_ROWS; y++)
         {
-            oled.setCursor(x, y);
+            oled.setCursor(x * FONT_W_PX, y);
             oled.write(screen[x][y]);
         }
     }

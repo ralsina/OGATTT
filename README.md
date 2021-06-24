@@ -103,14 +103,18 @@ This will probably never be implement fully everything a terminal should support
 
 ### Erasing:
 
- *  ESC [ K           erase to end of line (inclusive)
- *  ESC [ 0 K         erase to end of line (inclusive)
- *  ESC [ 1 K         erase to beginning of line (inclusive)
- *  ESC [ 2 K         erase entire line (cursor doesn't move)
- *  ESC [ J           erase to end of screen (inclusive)
- *  ESC [ 0 J         erase to end of screen (inclusive)
- *  ESC [ 1 J         erase to beginning of screen (inclusive)
- *  ESC [ 2 J         erase entire screen (cursor doesn't move)
+*  ESC [ K           erase to end of line (inclusive)
+*  ESC [ 0 K         erase to end of line (inclusive)
+*  ESC [ 1 K         erase to beginning of line (inclusive)
+*  ESC [ 2 K         erase entire line (cursor doesn't move)
+*  ESC [ J           erase to end of screen (inclusive)
+*  ESC [ 0 J         erase to end of screen (inclusive)
+*  ESC [ 1 J         erase to beginning of screen (inclusive)
+*  ESC [ 2 J         erase entire screen (cursor doesn't move)
+
+### Weird
+
+* ESC # 8            Fill the screen with the letter "E"
 
  ## Unit Testing
 

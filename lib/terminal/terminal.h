@@ -12,6 +12,8 @@ public:
     char kbd_buffer[10];
     uint8_t cursor_x = 0;
     uint8_t cursor_y = 0;
+    uint8_t saved_cursor_x = 0;
+    uint8_t saved_cursor_y = 0;
     vtparse_t parser;
     SSD1306AsciiAvrI2c oled; // FIXME: maybe take as argument
 

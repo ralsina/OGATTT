@@ -211,32 +211,32 @@ void Terminal::do_action(vtparse_action_t action, uint8_t ch)
 
 void Terminal::handle_csi_dispatch(uint8_t b)
 {
-    uint8_t pn;
-    // Shortcut for sequences with a single parameter
-    pn = parser.num_params ? parser.params[0] : 0;
+    // Shortcut for sequences with parameters
+    uint8_t p0 = parser.num_params > 0 ? parser.params[0] : 0;
+    uint8_t p1 = parser.num_params > 1 ? parser.params[1] : 0;
 
     switch (b)
     {
     case 'A': // CUU - Cursor Up
-        cursor_y = max(0, cursor_y - max(1, pn));
+        cursor_y = max(0, cursor_y - max(1, p0));
         break;
     case 'B': // CUB - Cursor Down
-        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, pn));
+        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, p0));
         break;
     case 'C': // CUF - Cursor Forward
-        cursor_x = min(SCREEN_COLS - 1, cursor_x + max(1, pn));
+        cursor_x = min(SCREEN_COLS - 1, cursor_x + max(1, p0));
         break;
     case 'D': // CUB - Cursor Backwards
-        cursor_x = max(0, cursor_x - max(1, pn));
+        cursor_x = max(0, cursor_x - max(1, p0));
         break;
 
     case 'H': // CUP – Cursor Position
-        cursor_x = min(max(parser.params[1], 0), SCREEN_COLS);
-        cursor_y = min(max(pn, 0), SCREEN_ROWS);
+        cursor_x = min(max(p1, 0), SCREEN_COLS);
+        cursor_y = min(max(p0, 0), SCREEN_ROWS);
         break;
 
     case 'J': // Erase screen
-        switch (pn)
+        switch (p0)
         {
         case 0: // Clear to end of screen
             clear(0, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
@@ -248,7 +248,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
             clear(0, SCREEN_COLS, 0, SCREEN_ROWS);
         }     // Intentional no break
     case 'K': // Erase line
-        switch (pn)
+        switch (p0)
         {
         case 0: // Clear to EOL
             clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
@@ -265,13 +265,13 @@ void Terminal::handle_csi_dispatch(uint8_t b)
     case 'q': // DECLL - Load LEDS (DEC Private)
         // Partial implementation, L1 reacts
         // to any of L1-L4 being turned on
-        switch(pn)
+        switch (p0)
         {
-            case 0:
-            digitalWrite(13, LOW);  // OFF
+        case 0:
+            digitalWrite(13, LOW); // OFF
             break;
-            default:
-            digitalWrite(13, HIGH);  // ON
+        default:
+            digitalWrite(13, HIGH); // ON
         }
 
     default:
@@ -283,16 +283,22 @@ void Terminal::handle_esc_dispatch(uint8_t b)
 {
     switch (b)
     {
-    case '8': // DECALN (WTF)
-        // This command fills the entire screen area with uppercase Es for
-        // screen focus and alignment. This command is used by DEC manufacturing
-        // and Field Service personnel.
-        if (parser.intermediate_chars[0] == '#')
+    case '7': // DECSC - Save Cursor
+        saved_cursor_x = cursor_x;
+        saved_cursor_y = cursor_y;
+        break;
+    case '8':
+        if (parser.intermediate_chars[0] == '#') // DECALN (WTF)
         {
-
-            Log.infoln("DECALN\r");
-            delay(1000);
+            // This command fills the entire screen area with uppercase Es for
+            // screen focus and alignment. This command is used by DEC manufacturing
+            // and Field Service personnel.
             clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+        }
+        else // DECRC - Restore cursor
+        {
+            cursor_x = saved_cursor_x;
+            cursor_y = saved_cursor_y;
         }
         break;
     default:

@@ -100,6 +100,8 @@ This will probably never be implement fully everything a terminal should support
 * CUF - ESC [ Pn C          Move cursor Pn to the right (up to right margin)
 * CUB - ESC [ Pn D          Move cursor Pn to the left (up to left margin)
 * CUP - ESC [ Pn ; Pn H     Move cursor to specific position
+* DECSC - ESC 7             Save cursor position
+* DECRC - ESC 8             Restore cursor position
 
 ### Erasing:
 
@@ -130,13 +132,18 @@ This will probably never be implement fully everything a terminal should support
 * DECINLM
 * DECKPAM
 * DECKPNM
+* DECOM  [MAYBE!]
+* DECREPTPARM
+* DECREPQTPARM
+
+### Need Research
 
 
- ## Unit Testing
+## Unit Testing
 
- It has a bunch of unit tests that can run using PlatformIO (no idea how to run them without that)
+It has a bunch of unit tests that can run using PlatformIO (no idea how to run them without that)
 
- ## Reference Material
+## Reference Material
 
 * [VT100 control sequences and Keyboard Map](http://braun-home.net/michael/info/misc/VT100_commands.htm)
 * [vtxxx state machine](https://vt100.net/emu/dec_ansi_parser#ACESCDIS)

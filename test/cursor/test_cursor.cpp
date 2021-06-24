@@ -161,6 +161,21 @@ void test_CUP(void)
     TEST_ASSERT_EQUAL(5, term.cursor_y);
 }
 
+void test_DECSC_DECRC(void)
+{
+    Terminal term;
+    term.cursor_x = 3;
+    term.cursor_y = 4;
+    term.process_string("\x0b7");
+    TEST_ASSERT_EQUAL(3, term.saved_cursor_x);
+    TEST_ASSERT_EQUAL(4, term.saved_cursor_y);
+    term.cursor_x = 20;
+    term.cursor_y = 2;
+    term.process_string("\x0b8");
+    TEST_ASSERT_EQUAL(3, term.cursor_x);
+    TEST_ASSERT_EQUAL(4, term.cursor_y);
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -173,6 +188,7 @@ void setup()
     RUN_TEST(test_CUD);
     RUN_TEST(test_CUF);
     RUN_TEST(test_CUP);
+    RUN_TEST(test_DECSC_DECRC);
 }
 
 void loop()

@@ -262,6 +262,19 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         break;
     case 'c': // Device attributes (TODO)
         break;
+    case 'h':
+    case 'l':
+        if (parser.intermediate_chars[0] == '?')
+        {
+            switch (p0)
+            {
+            case 5:
+                // DECSCNM reverse video
+                oled.invertDisplay(b == 'h');
+                break;
+            }
+        }
+        break;
     case 'q': // DECLL - Load LEDS (DEC Private)
         // Partial implementation, L1 reacts
         // to any of L1-L4 being turned on
@@ -273,7 +286,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         default:
             digitalWrite(13, HIGH); // ON
         }
-
+        break;
     default:
         Log.infoln("Unknown CSI character %c\r", b);
     }

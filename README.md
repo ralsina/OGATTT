@@ -114,6 +114,10 @@ This will probably never be implement fully everything a terminal should support
 *  ESC [ 1 J         erase to beginning of screen (inclusive)
 *  ESC [ 2 J         erase entire screen (cursor doesn't move)
 
+### Misc
+
+* DECSCNM - ESC [ ? 5 h|l   set/unset inverse video
+
 ### Weird
 
 * DECALN - ESC # 8            Fill the screen with the letter "E"
@@ -125,7 +129,7 @@ This will probably never be implement fully everything a terminal should support
 * DECARM
 * DECAWM
 * DECCKM
-* DECCOLM
+* DECCOLM [80 or 132 columns? YOU WISH!]
 * DECDHL
 * DECDWL
 * DECID
@@ -135,6 +139,7 @@ This will probably never be implement fully everything a terminal should support
 * DECOM  [MAYBE!]
 * DECREPTPARM
 * DECREPQTPARM
+* DECSCLM
 
 ### Need Research
 
@@ -150,3 +155,4 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 * [Keyboard Matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/)
 * [VT100 User Guide](https://vt100.net/docs/vt100-ug/)
 * [Line wrapping semantics](https://github.com/mattiase/wraptest)  (have not tried to follow it yet)
+* [VT100 Escape Codes](https://www.cs.csub.edu/howto/vt100_escape_codes.html) has some the official manual doesn't say, like DECSCNM

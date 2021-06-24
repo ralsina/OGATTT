@@ -83,3 +83,9 @@ This will probably never be implement fully everything a terminal should support
  ## Unit Testing
 
  It has a bunch of unit tests that can run using PlatformIO (no idea how to run them without that)
+
+ ## Reference Material
+
+ * [VT100 control sequences and Keyboard Map](http://braun-home.net/michael/info/misc/VT100_commands.htm)
+ * [vtxxx state machine](https://vt100.net/emu/dec_ansi_parser#ACESCDIS)
+ * [Keyboard Matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/)

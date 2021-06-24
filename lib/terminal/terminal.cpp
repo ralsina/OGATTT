@@ -243,9 +243,9 @@ void Terminal::handle_csi_dispatch(uint8_t b)
 
 void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2)
 {
-    for (uint8_t x = max(x1, 0); x < min(x2, SCREEN_COLS); x++)
+    for (uint8_t x = max(x1, 0); x < min(x2 + 1, SCREEN_COLS); x++)
     {
-        for (uint8_t y = max(y1, 0); y < min(y2, SCREEN_ROWS); y++)
+        for (uint8_t y = max(y1, 0); y < min(y2 + 1, SCREEN_ROWS); y++)
         {
             screen[x][y] = 0;
         }

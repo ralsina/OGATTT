@@ -127,6 +127,29 @@ void test_clear_whole_screen(void)
     }
 }
 
+void test_clear_whole_line(void)
+{
+    Terminal term;
+    term.cursor_y = 4;
+    term.process_string("4 Hello World");
+    term.cursor_y = 3;
+    term.cursor_x = 0;
+    term.process_string("3 Hello World");
+    term.cursor_x = 5;
+    // Clear the whole line 3
+    term.process_string("\x1B[2K");
+
+    for (int x = 0; x < SCREEN_COLS; x++)
+    {
+        TEST_ASSERT_EQUAL(0, term.screen[x][3]);
+    }
+    for (int x = 0; x < 13; x++)
+    {
+        TEST_ASSERT_NOT_EQUAL(0, term.screen[x][4]);
+    }
+
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -144,6 +167,7 @@ void setup()
 
     // // Screen clearing
     RUN_TEST(test_clear_whole_screen);
+    RUN_TEST(test_clear_whole_line);
 }
 
 void loop()

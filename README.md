@@ -72,22 +72,26 @@ I: Unknown CSI character A
 * BEL ✔
 * BS  ✔
 * HT  ✔
-* LF
-* VT
-* FF
-* CR
+* LF  ✔ (partial)
+* VT  ✔ (partial)
+* FF  ✔ (partial)
+* CR  ✔
 * SO
 * SI
 * XON
 * XOFF
-* CAN
-* SUB
+* CAN ✔ (I think?)
+* SUB ✔ (I think?)
 * ESC ✔
 * DEL ✔
 
 ## Implemented Control Sequences
 
 This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!) but I'll move forward even if slowly :-)
+
+### Cursor movement
+
+* ESC [ Pn D          Move Pn to the left (or to left margin)
 
 ### Erasing:
 

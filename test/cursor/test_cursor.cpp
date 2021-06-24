@@ -47,6 +47,43 @@ void test_tab(void)
     TEST_ASSERT_EQUAL(24, term.cursor_x);
 }
 
+void test_lf(void)
+{
+    // LF VT and FF All should do the same
+    // FIXME: this doesn't take "New Line Mode" into account yet
+    Terminal term;
+    term.cursor_x = 4;
+    term.cursor_y = 2;
+    term.process(10);
+    term.process(11);
+    term.process(12);
+    TEST_ASSERT_EQUAL(5, term.cursor_y);
+
+    // FIXME
+    // When scrolling down too much, the screen should scroll up
+    // and cursor_y be bound to the screen
+    term.cursor_y = SCREEN_ROWS - 1;
+    term.process(10);
+    term.process(10);
+    term.process(10);
+    // TEST_ASSERT_EQUAL(SCREEN_ROWS - 1, term.cursor_y);
+}
+
+void test_cud(void)
+{
+    Terminal term;
+    term.cursor_x = 10;
+    term.process_string("\x1B[3D"); // 3 back
+    TEST_ASSERT_EQUAL(7, term.cursor_x);
+    term.process_string("\x1B[D"); // 0 back means 1 back
+    TEST_ASSERT_EQUAL(6, term.cursor_x);
+    term.process_string("\x1B[1D"); // 1 back
+    TEST_ASSERT_EQUAL(5, term.cursor_x);
+    // Doesn't go left of 0
+    term.process_string("\x1B[9D"); // 9 back
+    TEST_ASSERT_EQUAL(0, term.cursor_x);
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -54,6 +91,8 @@ void setup()
     // Control characters that move the cursor
     RUN_TEST(test_backspace);
     RUN_TEST(test_tab);
+    RUN_TEST(test_lf);
+    RUN_TEST(test_cud);
 }
 
 void loop()

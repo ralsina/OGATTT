@@ -67,7 +67,7 @@ void Terminal::read_kbd()
 void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
 {
     int i;
-    Log.infoln("ACTION: %s -- %d '%c'\r", ACTION_NAMES[action], ch);
+    Log.infoln("ACTION: %s -- %d '%c'\r", ACTION_NAMES[action], ch, ch);
     Log.infoln("%d Intermediate chars:\r", parser.num_intermediate_chars);
     for (i = 0; i < parser.num_intermediate_chars; i++)
     {
@@ -205,8 +205,15 @@ void Terminal::do_action(vtparse_action_t action, uint8_t ch)
 
 void Terminal::handle_csi_dispatch(uint8_t b)
 {
+    uint8_t pn;
+    // Shortcut for sequences with a single parameter
+    pn = parser.num_params ? parser.params[0] : 0; 
+
     switch (b)
     {
+    case 'D':  // CUB - Cursor Backwards
+        cursor_x = max(0, cursor_x - max(1, pn));
+        break;
     case 'K':                                       // Erase line
     case 'J':                                       // Erase screen
         if (parser.num_params and parser.params[0]) // Should be only 0 or 1
@@ -337,10 +344,13 @@ void Terminal::handle_execute(uint8_t b)
         break;
     case 9: // HT FIXME: Fixed tabs at multiples of 8
         cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS) - 1;
-    case 10: // LF
+    case 10: // LF  FIXME: See "New Line Mode"
     case 11: // VT
     case 12: // FF
+        cursor_y += 1;
+        break;
     case 13: // CR
+        cursor_x = 0;
         break;
     case 14: // SO
         // TODO
@@ -349,11 +359,17 @@ void Terminal::handle_execute(uint8_t b)
         // TODO
         break;
     case 17: // XON
+        // TODO
         break;
     case 18: // XOFF
+        // TODO
         break;
     case 24: // CAN
-    case 26:
+    case 26: // SUB
+        // If sent during a control sequence, the sequence is immediately terminated
+        // and not executed. It also causes the error character to be displayed.
+        //
+        // My guess is this should be handled by the FSM already so not implementing
         break;
     case 127: // DEL
         break;

@@ -36,3 +36,39 @@ So, there is no way for anyone else to test this since I have
 not documented the wiring or anything else (you could figure it out
 from the Fritzing file in the repo) but it **does** work, as [this
 video](https://www.youtube.com/watch?v=cyT2SGMdR8Y) shows.
+
+## Testing IRL
+
+You can send data to the terminal and see what it does by connecting to it over serial.
+
+For example, if you send it normal characters, they will be displayed on the screen, and on the serial terminal you may see something like
+
+```
+I: ACTION: PRINT 's'
+I: 0 Intermediate chars:
+I: 1 Parameters:
+I: 	2
+I: ACTION: PRINT 'd'
+I: 0 Intermediate chars:
+I: 1 Parameters:
+I: 	2
+```
+
+## Implemented Control Sequences
+
+This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!)
+
+### Erasing:
+
+ *  ESC [ K           erase to end of line (inclusive)
+ *  ESC [ 0 K         erase to end of line (inclusive)
+ *  ESC [ 1 K         erase to beginning of line (inclusive)
+ *  ESC [ 2 K         erase entire line (cursor doesn't move)
+ *  ESC [ J           erase to end of screen (inclusive)
+ *  ESC [ 0 J         erase to end of screen (inclusive)
+ *  ESC [ 1 J         erase to beginning of screen (inclusive)
+ *  ESC [ 2 J         erase entire screen (cursor doesn't move)
+
+ ## Unit Testing
+
+ It has a bunch of unit tests that can run using PlatformIO (no idea how to run them without that)

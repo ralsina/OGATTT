@@ -41,7 +41,7 @@ video](https://www.youtube.com/watch?v=cyT2SGMdR8Y) shows.
 
 You can send data to the terminal and see what it does by connecting to it over serial.
 
-For example, if you send it normal characters, they will be displayed on the screen, and on the serial terminal you may see something like
+For example, if you send it normal characters, they will be displayed on the screen, and on the serial terminal you may see something like this:
 
 ```
 I: ACTION: PRINT 's'
@@ -54,9 +54,20 @@ I: 1 Parameters:
 I: 	2
 ```
 
+And if you sent a control sequence, you may see something like this 
+for "ESC[3A" (move cursor 3 up):
+
+```
+I: ACTION: CSI_DISPATCH 'A'
+I: 0 Intermediate chars:
+I: 1 Parameters:
+I: 	3
+I: Unknown CSI character A
+```
+
 ## Implemented Control Sequences
 
-This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!)
+This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!) but I'll move forward even if slowly :-)
 
 ### Erasing:
 

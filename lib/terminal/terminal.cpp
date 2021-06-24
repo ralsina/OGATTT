@@ -256,7 +256,12 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
     switch (b)
     {
-    case 7: // BEL
+    case '7': // BEL
+        // FIXME add a real LED, the builtin one is hidden behind the
+        // power one and not noticeable
+        digitalWrite(13, HIGH);
+        delay(150);
+        digitalWrite(13, LOW);
         break;
     case 8: // BS
         break;

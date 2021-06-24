@@ -10,8 +10,9 @@
 #define RST_PIN -1       // Define proper RST_PIN if required.
 
 #define FONT_W_PX 5
+#define FONT_H_PX 8
 
-#define SCREEN_COLS SCREEN_WIDTH / FONT_W_PX
-#define SCREEN_ROWS SCREEN_HEIGHT / 8
+#define SCREEN_COLS (SCREEN_WIDTH / FONT_W_PX)
+#define SCREEN_ROWS (SCREEN_HEIGHT / 8)
 
 #endif  // CONST__H

@@ -30,6 +30,11 @@ public:
 
     // Utility functions
     void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2);
+    void scroll(uint8_t rows);
+    void refresh(void);
+
+    // Debugging only
+    void process_string(const char s[]);  
 };
 
 #endif // TERMINAL__H

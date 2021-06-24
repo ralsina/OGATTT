@@ -29,6 +29,14 @@ void Terminal::process(uint8_t c)
     do_state_change(change, c);
 }
 
+void Terminal::process_string(const char s[])
+{
+    for (int i = 0; s[i]; i++)
+    {
+        process(s[i]);
+    }
+}
+
 void Terminal::read_kbd()
 {
     // Read keyboard event, put data in kbd_buffer
@@ -211,7 +219,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
                 clear(0, SCREEN_COLS, cursor_y, cursor_y); // Clear whole line
                 if (b == 'J')
                 {
-                    oled.clear(); // Clear whole screen
+                    clear(0, SCREEN_COLS, 0, SCREEN_ROWS); // Clear whole screen
                 }
             }
         }
@@ -235,6 +243,13 @@ void Terminal::handle_csi_dispatch(uint8_t b)
 
 void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2)
 {
+    for (uint8_t x = max(x1, 0); x < min(x2, SCREEN_COLS); x++)
+    {
+        for (uint8_t y = max(y1, 0); y < min(y2, SCREEN_ROWS); y++)
+        {
+            screen[x][y] = 0;
+        }
+    }
     oled.clear(x1 * FONT_W_PX, x2 * FONT_W_PX, y1, y2);
 }
 
@@ -287,10 +302,43 @@ void Terminal::handle_print(uint8_t b)
     }
     if (cursor_y == SCREEN_ROWS)
     {
-        oled.scrollDisplay(8);
+        scroll(1);
         cursor_y = SCREEN_ROWS - 1;
     }
     // Draw the cursor
     oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
     oled.write(178);
+}
+
+void Terminal::scroll(uint8_t n)
+{
+    // Scroll n rows up
+    if (n < 1)
+        return;
+    if (n > SCREEN_ROWS)
+    {
+        memset(screen, 0, SCREEN_ROWS * SCREEN_COLS);
+        return;
+    }
+    for (uint8_t x = 0; x < SCREEN_COLS; x++)
+    {
+        memmove(screen[x],
+                screen[x] + n,
+                SCREEN_ROWS - n);
+        memset(screen[x] + SCREEN_ROWS - n, 0, n);
+    }
+    refresh(); // FIXME: see if it can be made to work with oled.scrollDisplay
+}
+
+void Terminal::refresh(void)
+{
+    oled.clear();
+    for (uint8_t x = 0; x < SCREEN_COLS; x++)
+    {
+        for (uint8_t y = 0; y < SCREEN_ROWS; y++)
+        {
+            oled.setCursor(x, y);
+            oled.write(screen[x][y]);
+        }
+    }
 }

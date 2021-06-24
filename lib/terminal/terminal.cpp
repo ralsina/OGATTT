@@ -11,6 +11,9 @@ Terminal::Terminal()
 
     // Prepare 1-pin kbd
     pinMode(A0, INPUT_PULLUP);
+    // Use pin 13 LED
+    pinMode(13, OUTPUT);
+
     // Init VT parser
     parser.state = VTPARSE_STATE_GROUND;
     parser.num_intermediate_chars = 0;
@@ -259,18 +262,18 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         break;
     case 'c': // Device attributes (TODO)
         break;
-    case '8': // DECALN (WTF)
-        // This command fills the entire screen area with uppercase Es for
-        // screen focus and alignment. This command is used by DEC manufacturing
-        // and Field Service personnel.
-        if (parser.intermediate_chars[0] == '#')
+    case 'q': // DECLL - Load LEDS (DEC Private)
+        // Partial implementation, L1 reacts
+        // to any of L1-L4 being turned on
+        switch(pn)
         {
-
-            Log.infoln("DECALN\r");
-            delay(1000);
-            clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+            case 0:
+            digitalWrite(13, LOW);  // OFF
+            break;
+            default:
+            digitalWrite(13, HIGH);  // ON
         }
-        break;
+
     default:
         Log.infoln("Unknown CSI character %c\r", b);
     }

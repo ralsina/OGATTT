@@ -95,11 +95,11 @@ This will probably never be implement fully everything a terminal should support
 
 ### Cursor movement
 
-* ESC [ Pn A          Move cursor Pn rows up (up to top margin)
-* ESC [ Pn B          Move cursor Pn rows down (up to bottom margin)
-* ESC [ Pn C          Move cursor Pn to the right (up to right margin)
-* ESC [ Pn D          Move cursor Pn to the left (up to left margin)
-* ESC [ Pn ; Pn H     Move cursor to specific position
+* CUU - ESC [ Pn A          Move cursor Pn rows up (up to top margin)
+* CUD - ESC [ Pn B          Move cursor Pn rows down (up to bottom margin)
+* CUF - ESC [ Pn C          Move cursor Pn to the right (up to right margin)
+* CUB - ESC [ Pn D          Move cursor Pn to the left (up to left margin)
+* CUP - ESC [ Pn ; Pn H     Move cursor to specific position
 
 ### Erasing:
 
@@ -114,7 +114,23 @@ This will probably never be implement fully everything a terminal should support
 
 ### Weird
 
-* ESC # 8            Fill the screen with the letter "E"
+* DECALN - ESC # 8            Fill the screen with the letter "E"
+* DECLL  - ESC [ Ps q	        Turn LEDs on/off (partial support)
+
+### Not gonna implement
+
+* DECANM
+* DECARM
+* DECAWM
+* DECCKM
+* DECCOLM
+* DECDHL
+* DECDWL
+* DECID
+* DECINLM
+* DECKPAM
+* DECKPNM
+
 
  ## Unit Testing
 

@@ -85,6 +85,22 @@ void test_CUB(void)
     TEST_ASSERT_EQUAL(0, term.cursor_x);
 }
 
+void test_CUF(void)
+{
+    // Cursor Forward
+    Terminal term;
+    term.cursor_x = 10;
+    term.process_string("\x1B[3C"); // 3 right
+    TEST_ASSERT_EQUAL(13, term.cursor_x);
+    term.process_string("\x1B[C"); // 0 right means 1 right
+    TEST_ASSERT_EQUAL(14, term.cursor_x);
+    term.process_string("\x1B[1C"); // 1 right
+    TEST_ASSERT_EQUAL(15, term.cursor_x);
+    // Doesn't go right on SCREEN_COLS - 1
+    term.process_string("\x1B[99C"); // 9 right
+    TEST_ASSERT_EQUAL(SCREEN_COLS - 1, term.cursor_x);
+}
+
 void test_CUD(void)
 {
     // Cursor Down
@@ -101,6 +117,50 @@ void test_CUD(void)
     TEST_ASSERT_EQUAL(SCREEN_ROWS -1, term.cursor_y);
 }
 
+void test_CUU(void)
+{
+    // Cursor Up
+    Terminal term;
+    term.cursor_y = 6;
+    term.process_string("\x1B[3A"); // 3 up
+    TEST_ASSERT_EQUAL(3, term.cursor_y);
+    term.process_string("\x1B[A"); // 0 up means 1 up
+    TEST_ASSERT_EQUAL(2, term.cursor_y);
+    term.process_string("\x1B[1A"); // 1 up
+    TEST_ASSERT_EQUAL(1, term.cursor_y);
+    // Doesn't go less than 0
+    term.process_string("\x1B[9A"); // 9 down
+    TEST_ASSERT_EQUAL(0, term.cursor_y);
+}
+
+void test_CUP(void)
+{
+    // Cursor Up
+    Terminal term;
+    term.cursor_x = 5;
+    term.cursor_y = 5;
+    
+    // No params, sets x, y to 0
+    term.process_string("\x1B[H"); // Nothing means 0, 0
+    TEST_ASSERT_EQUAL(0, term.cursor_x);
+    TEST_ASSERT_EQUAL(0, term.cursor_y);
+
+    // Two params, sets x, y
+    term.process_string("\x1B[3;4H"); // x=4, y=3
+    TEST_ASSERT_EQUAL(4, term.cursor_x);
+    TEST_ASSERT_EQUAL(3, term.cursor_y);
+
+    // Single param sets y
+    term.process_string("\x1B[5;H"); // x=0, y=5
+    TEST_ASSERT_EQUAL(0, term.cursor_x);
+    TEST_ASSERT_EQUAL(5, term.cursor_y);
+
+    // This is still a single param, so just setting y
+    term.process_string("\x1B[;5H"); 
+    TEST_ASSERT_EQUAL(0, term.cursor_x);
+    TEST_ASSERT_EQUAL(5, term.cursor_y);
+}
+
 void setup()
 {
     UNITY_BEGIN();
@@ -111,6 +171,8 @@ void setup()
     RUN_TEST(test_lf);
     RUN_TEST(test_CUB);
     RUN_TEST(test_CUD);
+    RUN_TEST(test_CUF);
+    RUN_TEST(test_CUP);
 }
 
 void loop()

@@ -87,13 +87,19 @@ I: Unknown CSI character A
 
 ## Implemented Control Sequences
 
+The host sends the terminal "Control sequences" that do things such as move the cursor or clear a piece of screen.
+
+This section will list the ones I implemented.
+
 This will probably never be implement fully everything a terminal should support (hey, I have only 2KB of RAM!) but I'll move forward even if slowly :-)
 
 ### Cursor movement
 
+* ESC [ Pn A          Move cursor Pn rows up (up to top margin)
+* ESC [ Pn B          Move cursor Pn rows down (up to bottom margin)
+* ESC [ Pn C          Move cursor Pn to the right (up to right margin)
 * ESC [ Pn D          Move cursor Pn to the left (up to left margin)
-* ESC [ Pn B          Move cursor Pn down (up to bottom margin)
-
+* ESC [ Pn ; Pn H     Move cursor to specific position
 
 ### Erasing:
 
@@ -112,7 +118,8 @@ This will probably never be implement fully everything a terminal should support
 
  ## Reference Material
 
- * [VT100 control sequences and Keyboard Map](http://braun-home.net/michael/info/misc/VT100_commands.htm)
- * [vtxxx state machine](https://vt100.net/emu/dec_ansi_parser#ACESCDIS)
- * [Keyboard Matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/)
- * [VT100 User Guide](https://vt100.net/docs/vt100-ug/)
+* [VT100 control sequences and Keyboard Map](http://braun-home.net/michael/info/misc/VT100_commands.htm)
+* [vtxxx state machine](https://vt100.net/emu/dec_ansi_parser#ACESCDIS)
+* [Keyboard Matrix](http://blog.komar.be/how-to-make-a-keyboard-the-matrix/)
+* [VT100 User Guide](https://vt100.net/docs/vt100-ug/)
+* [Line wrapping semantics](https://github.com/mattiase/wraptest)  (have not tried to follow it yet)

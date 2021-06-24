@@ -211,12 +211,24 @@ void Terminal::handle_csi_dispatch(uint8_t b)
 
     switch (b)
     {
+    case 'A': // CUU - Cursor Up
+        cursor_y = max(0, cursor_y - max(1, pn));
+        break;
+    case 'B': // CUB - Cursor Down
+        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, pn));
+        break;
+    case 'C': // CUF - Cursor Forward
+        cursor_x = min(SCREEN_COLS - 1, cursor_x + max(1, pn));
+        break;
     case 'D': // CUB - Cursor Backwards
         cursor_x = max(0, cursor_x - max(1, pn));
         break;
-    case 'B': // CUB - Cursor Backwards
-        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, pn));
+
+    case 'H': // CUP – Cursor Position
+        cursor_x = min(max(parser.params[1], 0), SCREEN_COLS);
+        cursor_y = min(max(pn, 0), SCREEN_ROWS);
         break;
+
     case 'K':                                       // Erase line
     case 'J':                                       // Erase screen
         if (parser.num_params and parser.params[0]) // Should be only 0 or 1

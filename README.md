@@ -179,8 +179,8 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 
 * GND -> GND
 * VCC -> 5V
-* SCL -> A5
-* SDA -> A4
+* SCL -> D19/A5
+* SDA -> D18/A4
 
 ### From the keyboard to the Arduino Nano
 
@@ -197,9 +197,8 @@ Columns left->right, Rows top->bottom.
 * C9  -> D10
 * C10 -> D11
 * C11 -> D12
-* C12 -> A0
-* C13 -> A1
-* C14 -> A2
+* C12 -> D14/A0
+* C13 -> D15/A1
 
 
 * R5  -> A3

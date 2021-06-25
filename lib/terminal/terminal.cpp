@@ -6,13 +6,29 @@
 
 void (*resetFunc)(void) = 0;
 
+// uint8_t columns[] = {C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13};
+// uint8_t rows[] = {R5};
+
+#define KBD_COLS 2
+#define KBD_ROWS 1
+
+uint8_t kbd_cols[] = {3, 4};
+uint8_t kbd_rows[] = {2};
+
 Terminal::Terminal()
 {
     //Clear screen buffer
     memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
 
-    // Prepare 1-pin kbd
-    pinMode(A0, INPUT_PULLUP);
+    for (uint8_t i = 0; i < KBD_COLS; i++)
+    {
+        pinMode(kbd_cols[i], OUTPUT);
+        digitalWrite(kbd_cols[i], HIGH);
+    }
+    for (uint8_t i = 0; i < KBD_COLS; i++)
+    {
+        pinMode(kbd_rows[i], INPUT_PULLUP);
+    }
     // Use pin 13 LED
     pinMode(13, OUTPUT);
 
@@ -46,27 +62,20 @@ void Terminal::process_string(const char s[])
 void Terminal::read_kbd()
 {
     // Read keyboard event, put data in kbd_buffer
-
-    // One-pin kbd handler
-    switch (analogRead(A0))
+    // Matrix keyboard
+    for (uint8_t c = 0; c < KBD_COLS; c++)
     {
-    case 105 ... 800:
-        strncpy(kbd_buffer, "\r\n\0", 3);
-        break;
-    case 75 ... 104:
-        strncpy(kbd_buffer, "r\0", 2);
-        break;
-    case 50 ... 74:
-        strncpy(kbd_buffer, "e\0", 2);
-        break;
-    case 30 ... 49:
-        strncpy(kbd_buffer, "w\0", 2);
-        break;
-    case 0 ... 29:
-        strncpy(kbd_buffer, "q\0", 2);
-        break;
+        digitalWrite(kbd_cols[c], LOW);
+        for (uint8_t r = 0; r < KBD_ROWS; r++)
+        {
+            if (digitalRead(kbd_rows[r]) == LOW)
+            {
+                Log.infoln("Key %d %d DOWN\r", c, r);
+            }
+        }
+        digitalWrite(kbd_cols[c], HIGH);
     }
-    delay(200); // FIXME: Dummy debounce
+    delay(35); // FIXME: Dummy debounce
 }
 
 void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)
@@ -299,14 +308,14 @@ void Terminal::handle_csi_dispatch(uint8_t b)
     case 'q': // DECLL - Load LEDS (DEC Private)
         // Partial implementation, L1 reacts
         // to any of L1-L4 being turned on
-        switch (p0)
-        {
-        case 0:
-            digitalWrite(13, LOW); // OFF
-            break;
-        default:
-            digitalWrite(13, HIGH); // ON
-        }
+        // switch (p0)
+        // {
+        // case 0:
+        //     digitalWrite(13, LOW); // OFF
+        //     break;
+        // default:
+        //     digitalWrite(13, HIGH); // ON
+        // }
         break;
     default:
         Log.infoln("Unknown CSI character %c\r", b);

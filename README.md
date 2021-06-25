@@ -181,3 +181,25 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 * VCC -> 5V
 * SCL -> A5
 * SDA -> A4
+
+### From the keyboard to the Arduino Nano
+
+Columns left->right, Rows top->bottom.
+
+* C1  -> D2
+* C2  -> D3
+* C3  -> D4
+* C4  -> D5
+* C5  -> D6
+* C6  -> D7
+* C7  -> D8
+* C8  -> D9
+* C9  -> D10
+* C10 -> D11
+* C11 -> D12
+* C12 -> A0
+* C13 -> A1
+* C14 -> A2
+
+
+* R5  -> A3

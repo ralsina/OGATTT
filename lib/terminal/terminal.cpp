@@ -28,29 +28,38 @@ void Terminal::init()
 
     // Initialize keyboard
     keyboard.init();
-
-    // Setup timed events
-    timer.every(10000, Terminal::read_kbd, this);
-    timer.every(1000, this->read_serial);
 }
 
-bool Terminal::read_kbd(Terminal *self)
+void Terminal::tick()
 {
-    if (self->keyboard.get_key())
+    unsigned long t = micros();
+    if (t - serial_tock > 1000)  // 1 msec
+    {
+        read_serial();
+        serial_tock = t;
+    }
+    if (t - serial_tock > 10000)  // 10 msec
+    {
+        read_kbd();
+        kbd_tock = t;
+    }
+}
+
+void Terminal::read_kbd()
+{
+    if (keyboard.get_key())
     {
         // TODO: do something
     }
-    return true;
 }
 
-bool Terminal::read_serial(Terminal *self)
+void Terminal::read_serial()
 {
     // read the incoming bytes:
     while (Serial.available())
     {
-        self->process(Serial.read());
+        process(Serial.read());
     }
-    return true;
 }
 
 void Terminal::process(uint8_t c)

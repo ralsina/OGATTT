@@ -172,6 +172,7 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 * [VT100 User Guide](https://vt100.net/docs/vt100-ug/)
 * [Line wrapping semantics](https://github.com/mattiase/wraptest)  (have not tried to follow it yet)
 * [VT100 Escape Codes](https://www.cs.csub.edu/howto/vt100_escape_codes.html) has some the official manual doesn't say, like DECSCNM
+* [Linux console codes](https://man7.org/linux/man-pages/man4/console_codes.4.html)
 
 ## Wiring
 

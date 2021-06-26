@@ -2,7 +2,6 @@
 #define TERMINAL__H
 #include <SSD1306AsciiAvrI2c.h>
 #include <vtparse.h>
-#include <arduino-timer.h>
 
 #include "kbd.h"
 #include "const.h"
@@ -22,8 +21,9 @@ public:
     Keyboard keyboard;
 
     // Timer that checks input/output and reacts to events
-    Timer <10, micros, Terminal *> timer;
-    void tick(void) {timer.tick();};
+    void tick(void);
+    unsigned long kbd_tock = 0;
+    unsigned long serial_tock = 0;
 
     // Terminal state flags
 
@@ -31,8 +31,8 @@ public:
                       // true is "set/new line"
 
     // I/O handlers
-    static bool read_kbd(Terminal *);
-    static bool read_serial(Terminal *);
+    void read_kbd();
+    void read_serial();
 
     // State machine handlers
     void process(uint8_t c);

@@ -7,7 +7,7 @@ Terminal term;
 void setup()
 {
   // Initialize serial port
-  Serial.begin(9600);
+  Serial.begin(57600);
   while (!Serial && !Serial.available())
   {
   };
@@ -18,6 +18,7 @@ void setup()
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
   term.init();
   Log.infoln("Terminal Ready: %dx%d\r", SCREEN_COLS, SCREEN_ROWS);
+
 }
 
 void loop()

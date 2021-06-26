@@ -9,6 +9,14 @@ void (*resetFunc)(void) = 0;
 
 void Terminal::init()
 {
+    // Init internal state
+    cursor_x = 0;
+    cursor_y = 0;
+    saved_cursor_x = 0;
+    saved_cursor_y = 0;
+    kbd_tock = 0;
+    serial_tock = 0;
+    lnm = false;
 
     // Use pin 13 LED
     pinMode(13, OUTPUT);
@@ -35,7 +43,7 @@ void Terminal::init()
 void Terminal::tick()
 {
     unsigned long t = max(micros(), serial_tock); // micros wraps every 70 days
-    if (t - serial_tock > 1000)            // 1 msec
+    if (t - serial_tock > 1000)                   // 1 msec
     {
         read_serial();
         serial_tock = t;

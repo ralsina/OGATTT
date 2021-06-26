@@ -16,20 +16,11 @@ void setup()
   // Initialize logging
   // Can log to &Serial or &term.oled
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  term.init();
   Log.infoln("Terminal Ready: %dx%d\r", SCREEN_COLS, SCREEN_ROWS);
 }
 
 void loop()
 {
-  // read the incoming bytes:
-  while (Serial.available())
-  {
-    term.process(Serial.read());
-  }
-
-  term.read_kbd();
-  if (term.kbd_buffer[0])
-  {
-    Serial.write(term.kbd_buffer, strlen(term.kbd_buffer));
-  }
+  term.tick();
 }

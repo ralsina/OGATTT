@@ -2,33 +2,16 @@
 #include <ArduinoLog.h>
 #include <avr/pgmspace.h>
 
+#include "kbd.h"
 #include "terminal.h"
 
 void (*resetFunc)(void) = 0;
 
-// uint8_t columns[] = {C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13};
-// uint8_t rows[] = {R5};
-
-#define KBD_COLS 2
-#define KBD_ROWS 1
-
-uint8_t kbd_cols[] = {3, 4};
-uint8_t kbd_rows[] = {2};
-
-Terminal::Terminal()
+void Terminal::init()
 {
     //Clear screen buffer
     memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
 
-    for (uint8_t i = 0; i < KBD_COLS; i++)
-    {
-        pinMode(kbd_cols[i], OUTPUT);
-        digitalWrite(kbd_cols[i], HIGH);
-    }
-    for (uint8_t i = 0; i < KBD_COLS; i++)
-    {
-        pinMode(kbd_rows[i], INPUT_PULLUP);
-    }
     // Use pin 13 LED
     pinMode(13, OUTPUT);
 
@@ -42,6 +25,32 @@ Terminal::Terminal()
     oled.begin(&Adafruit128x64, I2C_ADDRESS);
     oled.setFont(Adafruit5x7);
     oled.clear();
+
+    // Initialize keyboard
+    keyboard.init();
+
+    // Setup timed events
+    timer.every(10000, Terminal::read_kbd, this);
+    timer.every(1000, this->read_serial);
+}
+
+bool Terminal::read_kbd(Terminal *self)
+{
+    if (self->keyboard.get_key())
+    {
+        // TODO: do something
+    }
+    return true;
+}
+
+bool Terminal::read_serial(Terminal *self)
+{
+    // read the incoming bytes:
+    while (Serial.available())
+    {
+        self->process(Serial.read());
+    }
+    return true;
 }
 
 void Terminal::process(uint8_t c)
@@ -57,25 +66,6 @@ void Terminal::process_string(const char s[])
     {
         process(s[i]);
     }
-}
-
-void Terminal::read_kbd()
-{
-    // Read keyboard event, put data in kbd_buffer
-    // Matrix keyboard
-    for (uint8_t c = 0; c < KBD_COLS; c++)
-    {
-        digitalWrite(kbd_cols[c], LOW);
-        for (uint8_t r = 0; r < KBD_ROWS; r++)
-        {
-            if (digitalRead(kbd_rows[r]) == LOW)
-            {
-                Log.infoln("Key %d %d DOWN\r", c, r);
-            }
-        }
-        digitalWrite(kbd_cols[c], HIGH);
-    }
-    delay(35); // FIXME: Dummy debounce
 }
 
 void Terminal::parser_callback(vtparse_action_t action, uint8_t ch)

@@ -9,8 +9,6 @@ void (*resetFunc)(void) = 0;
 
 void Terminal::init()
 {
-    //Clear screen buffer
-    memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
 
     // Use pin 13 LED
     pinMode(13, OUTPUT);
@@ -26,19 +24,23 @@ void Terminal::init()
     oled.setFont(Adafruit5x7);
     oled.clear();
 
+    //Clear screen buffer
+    memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
+    refresh();
+
     // Initialize keyboard
     keyboard.init();
 }
 
 void Terminal::tick()
 {
-    unsigned long t = micros();
-    if (t - serial_tock > 1000)  // 1 msec
+    unsigned long t = max(micros(), serial_tock); // micros wraps every 70 days
+    if (t - serial_tock > 1000)            // 1 msec
     {
         read_serial();
         serial_tock = t;
     }
-    if (t - serial_tock > 10000)  // 10 msec
+    if (t - kbd_tock > 10000) // 10 msec
     {
         read_kbd();
         kbd_tock = t;

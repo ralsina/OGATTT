@@ -4,15 +4,17 @@
 
 // FIXME some tests have hardcoded screen sizes
 
+Terminal term;
+
 void test_screen_buffer_exists(void)
 {
-    Terminal term;
+    term.init();
     TEST_ASSERT_EQUAL(0, term.screen[0][0]);
 }
 
 void test_print(void)
 {
-    Terminal term;
+    term.init();
     // Send characters to print, see they get printed
     for (uint8_t x = 0; x < SCREEN_COLS - 1; x++)
     {
@@ -26,7 +28,7 @@ void test_print(void)
 
 void test_print_follows_cursor(void)
 {
-    Terminal term;
+    term.init();
     term.cursor_x = 10;
     term.cursor_y = 5;
     TEST_ASSERT_EQUAL(0, term.screen[10][5]);
@@ -37,7 +39,7 @@ void test_print_follows_cursor(void)
 
 void test_process_printable(void)
 {
-    Terminal term;
+    term.init();
     // Send characters to print, see they get printed
     for (uint8_t x = 0; x < SCREEN_COLS - 1; x++)
     {
@@ -53,7 +55,7 @@ void test_overflow_wraps(void)
 {
     // Printing more than SCREEN_COLS chars
     // wraps to next line
-    Terminal term;
+    term.init();
     for (int i = 0; i < SCREEN_COLS + 5; i++)
     {
         term.process('X');
@@ -65,7 +67,7 @@ void test_overflow_wraps(void)
 
 void test_scroll(void)
 {
-    Terminal term;
+    term.init();
     for (int i = 0; i < SCREEN_ROWS; i++)
     {
         term.cursor_x = 0;
@@ -85,7 +87,7 @@ void test_scroll(void)
 
 void test_fill_screen(void)
 {
-    Terminal term;
+    term.init();
     // Screen filled like this:
     // 111111111
     // 222222222
@@ -110,7 +112,7 @@ void test_fill_screen(void)
 
 void test_clear(void)
 {
-    Terminal term;
+    term.init();
     term.process_string("\x1b#8"); // Fills screen with E
     // Compares per column
     for (int i = 0; i < SCREEN_COLS; i++)
@@ -121,7 +123,7 @@ void test_clear(void)
 
 void test_nlm(void)
 {
-    Terminal term;
+    term.init();
     TEST_ASSERT_EQUAL(false, term.lnm);
     term.process_string("\033[20h");
     TEST_ASSERT_EQUAL(true, term.lnm);

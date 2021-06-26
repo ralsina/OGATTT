@@ -2,10 +2,12 @@
 #include "terminal.h"
 #include <unity.h>
 
+Terminal term;
+
 // FIXME some tests have hardcoded screen sizes
 void test_clear_whole_screen(void)
 {
-    Terminal term;
+    term.init();
     // Fill the screen
     for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
     {
@@ -24,7 +26,7 @@ void test_clear_whole_screen(void)
 
 void test_clear_screen_from_beginning_to_cursor(void)
 {
-    Terminal term;
+    term.init();
     // Fill the screen
     for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
     {
@@ -51,7 +53,7 @@ void test_clear_screen_from_beginning_to_cursor(void)
 
 void test_clear_screen_from_cursor_to_end(void)
 {
-    Terminal term;
+    term.init();
     // Fill the screen
     for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
     {
@@ -78,7 +80,7 @@ void test_clear_screen_from_cursor_to_end(void)
 
 void test_clear_whole_line(void)
 {
-    Terminal term;
+    term.init();
     term.cursor_y = 4;
     term.process_string("4 Hello World");
     term.cursor_y = 3;
@@ -100,7 +102,7 @@ void test_clear_whole_line(void)
 
 void test_clear_line_left_of_cursor(void)
 {
-    Terminal term;
+    term.init();
     term.cursor_y = 4;
     term.process_string("1234567890");
     term.cursor_y = 5;
@@ -130,7 +132,7 @@ void test_clear_line_left_of_cursor(void)
 
 void test_clear_line_right_of_cursor(void)
 {
-    Terminal term;
+    term.init();
     term.cursor_y = 4;
     term.process_string("1234567890");
     term.cursor_y = 5;

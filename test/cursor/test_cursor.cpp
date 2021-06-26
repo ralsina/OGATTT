@@ -2,12 +2,14 @@
 #include "terminal.h"
 #include <unity.h>
 
+Terminal term;
+
 void test_backspace(void)
 {
     // BS moves the cursor to the left one character position,
     // unless it is at the left margin, in which case no action occurs.
+    term.init();
 
-    Terminal term;
     term.cursor_x = 4;
     term.cursor_y = 5;
 
@@ -32,7 +34,7 @@ void test_tab(void)
 {
     // HT moves cursor_x to next multiple of 8
 
-    Terminal term;
+    term.init();
     term.cursor_x = 4;
 
     term.process(9);
@@ -51,7 +53,7 @@ void test_lf(void)
 {
     // LF VT and FF All should do the same
     // FIXME: this doesn't take "New Line Mode" into account yet
-    Terminal term;
+    term.init();
     term.cursor_x = 4;
     term.cursor_y = 2;
     term.process(10);
@@ -72,7 +74,7 @@ void test_lf(void)
 void test_CUB(void)
 {
     // Cursor Backwards
-    Terminal term;
+    term.init();
     term.cursor_x = 10;
     term.process_string("\x1B[3D"); // 3 back
     TEST_ASSERT_EQUAL(7, term.cursor_x);
@@ -88,7 +90,7 @@ void test_CUB(void)
 void test_CUF(void)
 {
     // Cursor Forward
-    Terminal term;
+    term.init();
     term.cursor_x = 10;
     term.process_string("\x1B[3C"); // 3 right
     TEST_ASSERT_EQUAL(13, term.cursor_x);
@@ -104,7 +106,7 @@ void test_CUF(void)
 void test_CUD(void)
 {
     // Cursor Down
-    Terminal term;
+    term.init();
     term.cursor_y = 2;
     term.process_string("\x1B[3B"); // 3 down
     TEST_ASSERT_EQUAL(5, term.cursor_y);
@@ -120,7 +122,7 @@ void test_CUD(void)
 void test_CUU(void)
 {
     // Cursor Up
-    Terminal term;
+    term.init();
     term.cursor_y = 6;
     term.process_string("\x1B[3A"); // 3 up
     TEST_ASSERT_EQUAL(3, term.cursor_y);
@@ -136,7 +138,7 @@ void test_CUU(void)
 void test_CUP(void)
 {
     // Cursor Up
-    Terminal term;
+    term.init();
     term.cursor_x = 5;
     term.cursor_y = 5;
     
@@ -163,7 +165,7 @@ void test_CUP(void)
 
 void test_DECSC_DECRC(void)
 {
-    Terminal term;
+    term.init();
     term.cursor_x = 3;
     term.cursor_y = 4;
     term.process_string("\0337");
@@ -178,7 +180,7 @@ void test_DECSC_DECRC(void)
 
 void test_IND(void)
 {
-    Terminal term;
+    term.init();
     // Fill screen with Es
     term.process_string("\033#8");
     // repeat IND SCREEN_ROWS times
@@ -195,7 +197,7 @@ void test_IND(void)
 
 void test_NEL(void)
 {
-    Terminal term;
+    term.init();
     // Fill screen with Es
     term.process_string("\033#8");
     term.cursor_x = 10;
@@ -209,6 +211,7 @@ void test_NEL(void)
     }
     // Cursor should be in last row
     // Last row should be blank because we scrolled
+    TEST_ASSERT_EQUAL(SCREEN_ROWS, term.cursor_y);
     TEST_ASSERT_EQUAL(0, term.screen[0][SCREEN_ROWS-1]);
 }
 

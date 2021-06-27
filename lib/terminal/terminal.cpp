@@ -53,7 +53,7 @@ void Terminal::tick()
         read_serial();
         serial_tock = t;
     }
-    if (t - kbd_tock > 500000) // 10 msec
+    if (t - kbd_tock > 1000000) // 10 msec
     {
         read_kbd();
         kbd_tock = t;
@@ -320,16 +320,8 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         }
         break;
     case 'q': // DECLL - Load LEDS (DEC Private)
-        // Partial implementation, L1 reacts
-        // to any of L1-L4 being turned on
-        // switch (p0)
-        // {
-        // case 0:
-        //     digitalWrite(13, LOW); // OFF
-        //     break;
-        // default:
-        //     digitalWrite(13, HIGH); // ON
-        // }
+        // Can't implement because I am using the onboard LED
+        // pin for BEL and am out of pins.
         break;
     default:
         Log.infoln("Unknown CSI character %c\r", b);

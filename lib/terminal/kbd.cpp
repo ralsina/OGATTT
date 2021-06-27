@@ -3,13 +3,13 @@
 
 #include "kbd.h"
 
-#define KBD_COLS 1
-#define KBD_ROWS 1
+#define KBD_COLS 12
+#define KBD_ROWS 5
 
 // Actual wiring
-uint8_t kbd_cols[] = {2, 3};
-// uint8_t kbd_rows[] = {20, 4, 21};
-uint8_t kbd_rows[] = { 20};
+uint8_t kbd_cols[] = {2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17};
+
+uint8_t kbd_rows[] = {15, 14, 20, 4, 21};
 
 #define KEYCODE(c, r) (c << (4 + r))
 
@@ -23,10 +23,16 @@ void Keyboard::init()
     }
     for (uint8_t i = 0; i < KBD_ROWS; i++)
     {
-        // pinMode(kbd_rows[i], INPUT_PULLUP);
-        pinMode(kbd_rows[i], INPUT_PULLUP);
+        switch (kbd_rows[i])
+        {
+        case 20:
+        case 21:
+            break;
+        default:
+            pinMode(kbd_rows[i], INPUT_PULLUP);
+            break;
+        }
     }
-
 }
 
 const char *Keyboard::get_key()
@@ -44,23 +50,28 @@ const char *Keyboard::get_key()
 
     // Read keyboard event, put data in kbd_buffer
 
-
-    digitalWrite(2, LOW);
-    pinMode(20, INPUT);
-    Log.infoln("--> %d\r", analogRead(20));
-
-
-    // int x =0;
-    // for (uint8_t c = 0; c < KBD_COLS; c++)
-    // {
-    //     Log.infoln("Col: %d\r", kbd_cols[c]);
-    //     digitalWrite(kbd_cols[c], LOW);
-    //     for (uint8_t r = 0; r < KBD_ROWS; r++)
-    //     {
-    //         x = digitalRead(kbd_rows[r]);
-    //         Log.infoln("Row %d %d\r", kbd_rows[r], x);
-    //     }
-    //     digitalWrite(kbd_cols[c], HIGH);
-    // }
+    bool x = false;
+    for (uint8_t c = 0; c < KBD_COLS; c++)
+    {
+        digitalWrite(kbd_cols[c], LOW);
+        for (uint8_t r = 0; r < KBD_ROWS; r++)
+        {
+            switch (kbd_rows[r])
+            {
+            case 20:
+            case 21:
+                x = analogRead(kbd_rows[r]) < 500;
+                break;
+            default:
+                x = !digitalRead(kbd_rows[r]);
+                break;
+            }
+            if (x)
+            {
+                Log.infoln("CLICK %d %d\r", c, r);
+            }
+        }
+        digitalWrite(kbd_cols[c], HIGH);
+    }
     return 0;
 }

@@ -11,7 +11,7 @@ uint8_t kbd_cols[] = {2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17};
 
 uint8_t kbd_rows[] = {15, 14, 20, 4, 21};
 
-#define KEYCODE(c, r) (c << (4 + r))
+#define KEYCODE(r, c) (c + r * 16)
 
 void Keyboard::init()
 {
@@ -35,7 +35,7 @@ void Keyboard::init()
     }
 }
 
-const char *Keyboard::get_key()
+uint8_t Keyboard::get_key()
 {
     // According to the vt100 User Guide:
 
@@ -45,12 +45,16 @@ const char *Keyboard::get_key()
     // are used) until the key is released.
 
     // So, we should scan the kbd every 10msec, send any NEW keys, then
-    // if there was > 500msec from pressing and still pressed, start sending it
-    // every 33msec
+    // if there was > initial_delay from pressing and still pressed, start sending it
+    // every repeat_delay
 
-    // Read keyboard event, put data in kbd_buffer
+    // FIXME: keep internal list of "pressed keys" instead of returning
+    // the keycode
 
     bool x = false;
+    uint8_t keycode = 255;
+    bool emit = false;
+    unsigned long delta = micros() - last_emitted_time;
     for (uint8_t c = 0; c < KBD_COLS; c++)
     {
         digitalWrite(kbd_cols[c], LOW);
@@ -68,10 +72,33 @@ const char *Keyboard::get_key()
             }
             if (x)
             {
-                Log.infoln("CLICK %d %d\r", c, r);
+                emit = false;
+                keycode = KEYCODE(c, r);
+                if (keycode == last_emitted_keycode)
+                {
+                    if ((delta > initial_delay) || (delta > repeat_delay) && repeating)
+                    {
+                        emit = true;
+                        repeating = true;
+                    }
+                }
+                else // Different key
+                {
+                    repeating = false;
+                    emit = true;
+                }
+                if (emit)
+                {
+                    last_emitted_keycode = keycode;
+                    last_emitted_time = micros();
+                    digitalWrite(kbd_cols[c], HIGH);
+                    return keycode;
+                }
             }
         }
         digitalWrite(kbd_cols[c], HIGH);
     }
-    return 0;
+    if (delta > repeat_delay) // No key emitted for a while
+        repeating = false;
+    return 255;
 }

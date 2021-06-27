@@ -21,6 +21,7 @@ void Terminal::init()
     serial_tock = 0;
     lnm = false;
 
+    // LED is Visual Bell, BUZZER is the Bell.
     if (LED)
         pinMode(LED, OUTPUT);
     if (BUZZER)
@@ -53,7 +54,7 @@ void Terminal::tick()
         read_serial();
         serial_tock = t;
     }
-    if (t - kbd_tock > 1000000) // 10 msec
+    if (t - kbd_tock > 10000) // 10 msec
     {
         read_kbd();
         kbd_tock = t;
@@ -62,9 +63,10 @@ void Terminal::tick()
 
 void Terminal::read_kbd()
 {
-    if (keyboard.get_key())
+    uint8_t kc = keyboard.get_key();
+    if ( kc != 255)
     {
-        // TODO: do something
+        Log.infoln("--> %d\r", kc);
     }
 }
 

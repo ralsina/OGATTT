@@ -125,7 +125,6 @@ This will probably never be implement fully everything a terminal should support
 ### Weird
 
 * DECALN - ESC # 8            Fill the screen with the letter "E"
-* DECLL  - ESC [ Ps q	        Turn LEDs on/off (partial support)
 
 ### Not gonna implement
 
@@ -146,6 +145,7 @@ This will probably never be implement fully everything a terminal should support
 * DECSCLM
 * DECSWL
 * DECTST
+* DECLL  Turn LEDs on/off (out of pins, and am using the onboard LED for bell)
 
 ### Need Research
 
@@ -173,6 +173,7 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 * [Line wrapping semantics](https://github.com/mattiase/wraptest)  (have not tried to follow it yet)
 * [VT100 Escape Codes](https://www.cs.csub.edu/howto/vt100_escape_codes.html) has some the official manual doesn't say, like DECSCNM
 * [Linux console codes](https://man7.org/linux/man-pages/man4/console_codes.4.html)
+* [DEC CRT typography AKA as "this is why I don't use any vt-like font"](https://www.masswerk.at/nowgobang/2019/dec-crt-typography)
 
 ## Wiring
 
@@ -185,49 +186,41 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 
 ### From the keyboard to the Arduino Nano
 
-Columns left->right, Rows top->bottom.
+
+This is the list of Arduino pins -> thing.
+
+Columns are C1 -> C12 left->right, Rows are R1 -> R5 top->bottom.
 
 
-* D2
-* D3
-* D4
-* D5
-* D6
-* D7
-* D8
-* D9
-* D10
-* D11
-* D12
-* D13 [LED/BUZZER]
-* D14
-* D15
-* D16 R4
-* D17 R5
+* D2  -> C1
+* D3  -> C2
+* D4  -> R4
+* D5  -> C3
+* D6  -> C4
+* D7  -> C5
+* D8  -> C6
+* D9  -> C7
+* D10 -> C8
+* D11 -> C9
+* D12 -> C10
+* D13 -> [LED/ + pin of BUZZER]
+* D14 -> R2   
+* D15 -> R1
+* D16 -> C11
+* D17 -> C12
 * D18 [Screen]
 * D19 [Screen]
-* D20 C2
-* D21 C1
+* D20 -> R5
+* D21 -> R3
 
-* C1  -> D2
-* C2  -> D3
-* C3  -> D4
-* C4  -> D5
-* C5  -> D6
-* C6  -> D7
-* C7  -> D8
-* C8  -> D9
-* C9  -> D10
-* C10 -> D11
-* C11 -> D12
-* C12 -> D14/A0
-* C13 -> D15/A1
+Because they don't have internal pullup resistors, D20 and D21 are  "special":
 
-* R3  -> 
-* R4  -> D16/A2
-* R5  -> D17/A3
-# From the buzzer to the Arduino Nano
+* We have to use `analogRead` instead of `digitalRead` on them.
+* They are wired to a 1KΩ resistor than then connects to 5V
 
-* +   -> D13
-* GND -> GND
+Also, these are connected to GND:
 
+* The buzzer
+* The screen
+
+And finally, the screen has a wire connected to 5V.

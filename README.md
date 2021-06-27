@@ -186,7 +186,6 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 
 ### From the keyboard to the Arduino Nano
 
-
 This is the list of Arduino pins -> thing.
 
 Columns are C1 -> C12 left->right, Rows are R1 -> R5 top->bottom.
@@ -217,10 +216,3 @@ Because they don't have internal pullup resistors, D20 and D21 are  "special":
 
 * We have to use `analogRead` instead of `digitalRead` on them.
 * They are wired to a 1KΩ resistor than then connects to 5V
-
-Also, these are connected to GND:
-
-* The buzzer
-* The screen
-
-And finally, the screen has a wire connected to 5V.

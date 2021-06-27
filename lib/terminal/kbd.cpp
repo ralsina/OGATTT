@@ -73,10 +73,10 @@ uint8_t Keyboard::get_key()
             if (x)
             {
                 emit = false;
-                keycode = KEYCODE(c, r);
+                keycode = KEYCODE(r, c);
                 if (keycode == last_emitted_keycode)
                 {
-                    if ((delta > initial_delay) || (delta > repeat_delay) && repeating)
+                    if ((delta > initial_delay) || ((delta > repeat_delay) && repeating))
                     {
                         emit = true;
                         repeating = true;
@@ -99,6 +99,15 @@ uint8_t Keyboard::get_key()
         digitalWrite(kbd_cols[c], HIGH);
     }
     if (delta > repeat_delay) // No key emitted for a while
+    {
         repeating = false;
+        /* FIXME:
+        If I don't set last_emitted_keycode, then when re-pressing the same
+        key it starts repeating fast.
+        If I set it, it **always** repeats fast.
+        WTF.
+        */
+        // last_emitted_keycode = 255;
+    }
     return 255;
 }

@@ -16,13 +16,13 @@ void test_print(void)
 {
     term.init();
     // Send characters to print, see they get printed
-    for (uint8_t x = 0; x < SCREEN_COLS - 1; x++)
+    for (uint8_t x = 1; x < SCREEN_COLS; x++)
     {
-        TEST_ASSERT_EQUAL(0, term.screen[x][0]);
+        TEST_ASSERT_EQUAL(0, term.screen[x][1]);
         TEST_ASSERT_EQUAL(x, term.cursor_x);
         term.handle_print('a' + x);
-        TEST_ASSERT_EQUAL('a' + x, term.screen[x][0]);
-        TEST_ASSERT_EQUAL(0, term.cursor_y);
+        TEST_ASSERT_EQUAL('a' + x, term.screen[x][1]);
+        TEST_ASSERT_EQUAL(1, term.cursor_y);
     }
 }
 
@@ -41,13 +41,13 @@ void test_process_printable(void)
 {
     term.init();
     // Send characters to print, see they get printed
-    for (uint8_t x = 0; x < SCREEN_COLS - 1; x++)
+    for (uint8_t x = 1; x < SCREEN_COLS; x++)
     {
-        TEST_ASSERT_EQUAL(0, term.screen[x][0]);
+        TEST_ASSERT_EQUAL(0, term.screen[x][1]);
         TEST_ASSERT_EQUAL(x, term.cursor_x);
         term.process('a' + x);
-        TEST_ASSERT_EQUAL('a' + x, term.screen[x][0]);
-        TEST_ASSERT_EQUAL(0, term.cursor_y);
+        TEST_ASSERT_EQUAL('a' + x, term.screen[x][1]);
+        TEST_ASSERT_EQUAL(1, term.cursor_y);
     }
 }
 
@@ -60,40 +60,42 @@ void test_overflow_wraps(void)
     {
         term.process('X');
     }
-    TEST_ASSERT_EQUAL(5, term.cursor_x);
-    TEST_ASSERT_EQUAL(1, term.cursor_y);
+    TEST_ASSERT_EQUAL(6, term.cursor_x);
+    TEST_ASSERT_EQUAL(2, term.cursor_y);
     TEST_ASSERT_EQUAL('X', term.screen[4][1]);
 }
 
 void test_scroll(void)
 {
     term.init();
-    for (int i = 0; i < SCREEN_ROWS; i++)
+    for (int i = 1; i <= SCREEN_ROWS; i++)
     {
-        term.cursor_x = 0;
+        term.cursor_x = 1;
         term.cursor_y = i;
         term.handle_print('0' + i);
     }
-    TEST_ASSERT_EQUAL_STRING_LEN("01234567", term.screen, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("12345678", term.screen[1] + 1, 8);
     term.scroll(3);
-    TEST_ASSERT_EQUAL_STRING_LEN("34567", term.screen, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("45678", term.screen[1] + 1, 8);
     term.scroll(0);
-    TEST_ASSERT_EQUAL_STRING_LEN("34567", term.screen, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("45678", term.screen[1] + 1, 8);
     term.scroll(1);
-    TEST_ASSERT_EQUAL_STRING_LEN("4567", term.screen, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("5678", term.screen[1] + 1, 8);
     term.scroll(100);
-    TEST_ASSERT_EQUAL_STRING_LEN("", term.screen, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("", term.screen[1] + 1, 8);
 }
 
 void test_fill_screen(void)
 {
     term.init();
-    // Screen filled like this:
+    term.clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
+    // Screen filled like this (missing one char in the lower left
+    // corner to avoid scrolling):
+    // 000000000
     // 111111111
     // 222222222
     // ...
-    // 777777777
-    // 000000000
+    // 77777777
 
     for (int i = 0; i < SCREEN_COLS * SCREEN_ROWS - 1; i++)
     {
@@ -103,11 +105,11 @@ void test_fill_screen(void)
         term.process(c);
     }
     // Compares per column
-    for (int i = 0; i < SCREEN_COLS - 1; i++)
+    for (int i = 1; i < SCREEN_COLS; i++)
     {
-        TEST_ASSERT_EQUAL_STRING_LEN("012345670", term.screen[i], 8);
+        TEST_ASSERT_EQUAL_STRING_LEN("01234567", term.screen[i] + 1, 8);
     }
-    TEST_ASSERT_EQUAL_STRING_LEN("0123456", term.screen[SCREEN_COLS - 1], 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("0123456", term.screen[SCREEN_COLS] + 1, 7);
 }
 
 void test_clear(void)
@@ -115,9 +117,9 @@ void test_clear(void)
     term.init();
     term.process_string("\x1b#8"); // Fills screen with E
     // Compares per column
-    for (int i = 0; i < SCREEN_COLS; i++)
+    for (int i = 1; i <= SCREEN_COLS; i++)
     {
-        TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term.screen[i], 8);
+        TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term.screen[i] + 1, 8);
     }
 }
 
@@ -143,9 +145,9 @@ void setup()
 
     // Screen handling
     RUN_TEST(test_scroll);
-    RUN_TEST(test_fill_screen);
     RUN_TEST(test_overflow_wraps);
     RUN_TEST(test_clear);
+    RUN_TEST(test_fill_screen);
 }
 
 void loop()

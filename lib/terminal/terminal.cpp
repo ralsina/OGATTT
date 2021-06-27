@@ -5,21 +5,26 @@
 #include "kbd.h"
 #include "terminal.h"
 
+#define LED 13
+#define BUZZER 13
+
 void (*resetFunc)(void) = 0;
 
 void Terminal::init()
 {
     // Init internal state
-    cursor_x = 0;
-    cursor_y = 0;
-    saved_cursor_x = 0;
-    saved_cursor_y = 0;
+    cursor_x = 1;
+    cursor_y = 1;
+    saved_cursor_x = 1;
+    saved_cursor_y = 1;
     kbd_tock = 0;
     serial_tock = 0;
     lnm = false;
 
-    // Use pin 13 LED
-    pinMode(13, OUTPUT);
+    if (LED)
+        pinMode(LED, OUTPUT);
+    if (BUZZER)
+        pinMode(BUZZER, OUTPUT);
 
     // Init VT parser
     parser.state = VTPARSE_STATE_GROUND;
@@ -33,7 +38,7 @@ void Terminal::init()
     oled.clear();
 
     //Clear screen buffer
-    memset(screen, 0, SCREEN_COLS * SCREEN_ROWS);
+    memset(screen, 0, (SCREEN_COLS +1) * (SCREEN_ROWS + 1));
     refresh();
 
     // Initialize keyboard
@@ -48,7 +53,7 @@ void Terminal::tick()
         read_serial();
         serial_tock = t;
     }
-    if (t - kbd_tock > 10000) // 10 msec
+    if (t - kbd_tock > 500000) // 10 msec
     {
         read_kbd();
         kbd_tock = t;
@@ -240,20 +245,20 @@ void Terminal::handle_csi_dispatch(uint8_t b)
     case 'A': // CUU - Cursor Up
         cursor_y = max(0, cursor_y - max(1, p0));
         break;
-    case 'B': // CUB - Cursor Down
-        cursor_y = min(SCREEN_ROWS - 1, cursor_y + max(1, p0));
+    case 'B': // CUD - Cursor Down
+        cursor_y = min(SCREEN_ROWS, cursor_y + max(1, p0));
         break;
     case 'C': // CUF - Cursor Forward
-        cursor_x = min(SCREEN_COLS - 1, cursor_x + max(1, p0));
+        cursor_x = min(SCREEN_COLS, cursor_x + max(1, p0));
         break;
     case 'D': // CUB - Cursor Backwards
-        cursor_x = max(0, cursor_x - max(1, p0));
+        cursor_x = max(1, cursor_x - max(1, p0));
         break;
 
     case 'f': // HVP
     case 'H': // CUP – Cursor Position
-        cursor_x = min(max(p1, 0), SCREEN_COLS);
-        cursor_y = min(max(p0, 0), SCREEN_ROWS);
+        cursor_x = min(max(p1, 1), SCREEN_COLS);
+        cursor_y = min(max(p0, 1), SCREEN_ROWS);
         break;
 
     case 'J': // ED - Erase In Display
@@ -360,7 +365,7 @@ void Terminal::handle_esc_dispatch(uint8_t b)
         break;
     case 'E': // NEL - Next Line
         cursor_y++;
-        cursor_x = 0;
+        cursor_x = 1;
         break;
     default:
         Log.infoln("Unknown ESC_DISPATCH character %c\r", b);
@@ -369,9 +374,9 @@ void Terminal::handle_esc_dispatch(uint8_t b)
 
 void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 {
-    for (uint8_t x = max(x1, 0); x < min(x2, SCREEN_COLS); x++)
+    for (uint8_t x = max(x1, 1); x <= min(x2, SCREEN_COLS); x++)
     {
-        for (uint8_t y = max(y1, 0); y < min(y2 + 1, SCREEN_ROWS); y++)
+        for (uint8_t y = max(y1, 1); y <= min(y2 + 1, SCREEN_ROWS); y++)
         {
             screen[x][y] = c;
         }
@@ -392,22 +397,22 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
 
     // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-    oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
+    oled.setCursor((cursor_x -1) * FONT_W_PX, cursor_y);
     oled.write(b);
     screen[cursor_x][cursor_y] = b;
     // Advance cursor
     cursor_x += 1;
 
     // Wrap / Scroll
-    if (cursor_x == SCREEN_COLS)
+    if (cursor_x > SCREEN_COLS)
     {
-        cursor_x = 0;
+        cursor_x = 1;
         cursor_y++;
     }
-    if (cursor_y == SCREEN_ROWS)
+    if (cursor_y > SCREEN_ROWS)
     {
         scroll(1);
-        cursor_y = SCREEN_ROWS - 1;
+        cursor_y = SCREEN_ROWS;
     }
     // Draw the cursor
     oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
@@ -418,18 +423,19 @@ void Terminal::scroll(uint8_t n)
 {
     // Scroll n rows up
     if (n < 1)
+        // TODO Implement scroll DOWN
         return;
-    if (n > SCREEN_ROWS)
+    if (n >= SCREEN_ROWS)
     {
         memset(screen, 0, SCREEN_ROWS * SCREEN_COLS);
         return;
     }
-    for (uint8_t x = 0; x < SCREEN_COLS; x++)
+    for (uint8_t x = 1; x <= SCREEN_COLS; x++)
     {
-        memmove(screen[x],
-                screen[x] + n,
+        memmove(screen[x] + 1,
+                screen[x] + n + 1,
                 SCREEN_ROWS - n);
-        memset(screen[x] + SCREEN_ROWS - n, 0, n);
+        memset(screen[x] + 1 + SCREEN_ROWS - n, 0, n);
     }
     refresh(); // FIXME: see if it can be made to work with oled.scrollDisplay
 }
@@ -457,28 +463,26 @@ void Terminal::handle_execute(uint8_t b)
         Serial.write("Hi There");
         break;
     case 7: // BEL
-        // FIXME add a real LED or a beeper, the builtin LED is hidden behind the
-        // power one and not noticeable
-        digitalWrite(13, HIGH);
-        delay(500);
-        digitalWrite(13, LOW);
-        break;
+        // FIXME do it without the delay using the timer loop
+        tone(BUZZER, 200);
+        delay(100);
+        noTone(BUZZER);
     case 8: // BS
-        cursor_x = max(0, cursor_x - 1);
+        cursor_x = max(1, cursor_x - 1);
         break;
     case 9: // HT FIXME: Fixed tabs at multiples of 8
-        cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS) - 1;
+        cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS);
     case 10: // LF
     case 11: // VT
     case 12: // FF
         cursor_y += 1;
         if (lnm)
         {
-            cursor_x = 0;
+            cursor_x = 1;
         }
         break;
     case 13: // CR
-        cursor_x = 0;
+        cursor_x = 1;
         break;
     case 14: // SO
         // TODO

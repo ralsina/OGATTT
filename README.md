@@ -187,6 +187,28 @@ It has a bunch of unit tests that can run using PlatformIO (no idea how to run t
 
 Columns left->right, Rows top->bottom.
 
+
+* D2
+* D3
+* D4
+* D5
+* D6
+* D7
+* D8
+* D9
+* D10
+* D11
+* D12
+* D13 [LED/BUZZER]
+* D14
+* D15
+* D16 R4
+* D17 R5
+* D18 [Screen]
+* D19 [Screen]
+* D20 C2
+* D21 C1
+
 * C1  -> D2
 * C2  -> D3
 * C3  -> D4
@@ -201,5 +223,11 @@ Columns left->right, Rows top->bottom.
 * C12 -> D14/A0
 * C13 -> D15/A1
 
+* R3  -> 
+* R4  -> D16/A2
+* R5  -> D17/A3
+# From the buzzer to the Arduino Nano
 
-* R5  -> A3
+* +   -> D13
+* GND -> GND
+

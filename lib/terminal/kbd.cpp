@@ -3,15 +3,15 @@
 
 #include "kbd.h"
 
-#define KBD_COLS 2
+#define KBD_COLS 1
 #define KBD_ROWS 1
 
-#define KEYCODE(c, r) (c << (4 + r))
-
 // Actual wiring
-uint8_t kbd_cols[] = {3, 4};
-uint8_t kbd_rows[] = {2};
+uint8_t kbd_cols[] = {2, 3};
+// uint8_t kbd_rows[] = {20, 4, 21};
+uint8_t kbd_rows[] = { 20};
 
+#define KEYCODE(c, r) (c << (4 + r))
 
 void Keyboard::init()
 {
@@ -23,6 +23,7 @@ void Keyboard::init()
     }
     for (uint8_t i = 0; i < KBD_ROWS; i++)
     {
+        // pinMode(kbd_rows[i], INPUT_PULLUP);
         pinMode(kbd_rows[i], INPUT_PULLUP);
     }
 
@@ -43,18 +44,23 @@ const char *Keyboard::get_key()
 
     // Read keyboard event, put data in kbd_buffer
 
-    for (uint8_t c = 0; c < KBD_COLS; c++)
-    {
-        digitalWrite(kbd_cols[c], LOW);
-        for (uint8_t r = 0; r < KBD_ROWS; r++)
-        {
-            if (digitalRead(kbd_rows[r]) == LOW)
-            {
-                Log.infoln("Key %d,%d DOWN (%02X)\r", c, r, KEYCODE(c, r));
-            }
-        }
-        digitalWrite(kbd_cols[c], HIGH);
-    }
-    delay(35); // FIXME: Implement timing/debounce
+
+    digitalWrite(2, LOW);
+    pinMode(20, INPUT);
+    Log.infoln("--> %d\r", analogRead(20));
+
+
+    // int x =0;
+    // for (uint8_t c = 0; c < KBD_COLS; c++)
+    // {
+    //     Log.infoln("Col: %d\r", kbd_cols[c]);
+    //     digitalWrite(kbd_cols[c], LOW);
+    //     for (uint8_t r = 0; r < KBD_ROWS; r++)
+    //     {
+    //         x = digitalRead(kbd_rows[r]);
+    //         Log.infoln("Row %d %d\r", kbd_rows[r], x);
+    //     }
+    //     digitalWrite(kbd_cols[c], HIGH);
+    // }
     return 0;
 }

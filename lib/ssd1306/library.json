@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "greiman/SSD1306Ascii": "^1.3.1"
+  }
+}

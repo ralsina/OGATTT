@@ -1,7 +1,10 @@
+#include <ArduinoLog.h>
 #include "ssd1306_screen.h"
 
 void SSD1306Screen::init()
 {
+    Log.infoln("SSD1306::init\r");
+
     screen.begin(&Adafruit128x64, I2C_ADDRESS);
     screen.setFont(Adafruit5x7);
     Screen::init();
@@ -19,6 +22,7 @@ void SSD1306Screen::clear(uint8_t c)
 
 void SSD1306Screen::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 {
+    Log.infoln("Clearing in screen\r");
     Screen::clear(x1, x2, y1, y2, c);
     if (c)
         refresh();

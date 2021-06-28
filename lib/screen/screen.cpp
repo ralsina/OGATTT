@@ -1,3 +1,4 @@
+#include <ArduinoLog.h>
 #include "screen.h"
 #include <string.h>
 #include <stdint.h>
@@ -8,14 +9,15 @@ uint8_t _screen[SCREEN_COLS + 1][SCREEN_ROWS + 1];
 
 void Screen::init()
 {
+    Log.infoln("Screen::init\r");
     clear();
 };
 
 void Screen::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 {
-    for (uint8_t x = MAX(x1, 1); x <= MIN(x2, SCREEN_COLS); x++)
+    for (int x = MAX(x1, 1); x <= MIN(x2, SCREEN_COLS); x++)
     {
-        for (uint8_t y = MAX(y1, 1); y <= MIN(y2, SCREEN_ROWS); y++)
+        for (int y = MAX(y1, 1); y <= MIN(y2, SCREEN_ROWS); y++)
         {
             _screen[x][y] = c;
         }

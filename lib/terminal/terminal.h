@@ -9,9 +9,13 @@
 class Terminal
 {
 public:
-    Terminal(){};
-    void init(Keyboard kbd, Screen screen);
+    Terminal(Keyboard *kbd,Screen * scr)
+    {
+        keyboard = kbd;
+        screen = scr;
+    };
 
+    void init();
     // Cursor position (1,1 -> SCREEN_COLS, SCREEN_ROWS)
     uint8_t cursor_x = 0;
     uint8_t cursor_y = 0;
@@ -23,17 +27,15 @@ public:
     vtparse_t parser;
 
     // Keyboard for user input
-    Keyboard keyboard;
+    Keyboard *keyboard;
     // Screen for display
-    Screen screen;
-
+    Screen *screen;
 
     // Terminal state flags. Terminal may behave
     // differently based on these flags
 
     bool lnm = false; // false is "reset/line feed"
                       // true is "set/new line"
-
 
     // Timer that checks input/output and reacts to events
     void tick(void);

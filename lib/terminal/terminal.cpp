@@ -18,7 +18,7 @@
 
 void (*resetFunc)(void) = 0;
 
-void Terminal::init(Keyboard kbd, Screen scr)
+void Terminal::init()
 {
     // Init internal state
     cursor_x = 1;
@@ -28,10 +28,8 @@ void Terminal::init(Keyboard kbd, Screen scr)
     kbd_tock = 0;
     serial_tock = 0;
     lnm = false;
-    keyboard = kbd;
-    keyboard.init();
-    screen = scr;
-    screen.init();
+    keyboard->init();
+    screen->init();
 
     // LED is Visual Bell, BUZZER is the Bell.
     if (LED)
@@ -67,7 +65,7 @@ void Terminal::tick()
 
 void Terminal::read_kbd()
 {
-    uint8_t kc = keyboard.get_key();
+    uint8_t kc = keyboard->get_key();
     if (kc != 255)
     {
         Log.infoln("--> %d\r", kc);
@@ -271,25 +269,25 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         switch (p0)
         {
         case 0: // Clear to end of screen
-            screen.clear(1, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
+            screen->clear(1, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
             break;
         case 1: // Clear from start of screen
-            screen.clear(1, SCREEN_COLS, 1, cursor_y - 1);
+            screen->clear(1, SCREEN_COLS, 1, cursor_y - 1);
             break;
         default: // 2 Clear whole screen
-            screen.clear(1, SCREEN_COLS, 1, SCREEN_ROWS);
+            screen->clear(1, SCREEN_COLS, 1, SCREEN_ROWS);
         }     // Intentional no break
     case 'K': // EK - Erase In Line
         switch (p0)
         {
         case 0: // Clear to EOL
-            screen.clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
+            screen->clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
             break;
         case 1: // Clear from start of line
-            screen.clear(1, cursor_x, cursor_y, cursor_y);
+            screen->clear(1, cursor_x, cursor_y, cursor_y);
             break;
         default: // 2  Clear whole line
-            screen.clear(1, SCREEN_COLS, cursor_y, cursor_y);
+            screen->clear(1, SCREEN_COLS, cursor_y, cursor_y);
         }
         break;
     case 'c': // Device attributes (TODO)
@@ -306,7 +304,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
             {
             case 5:
                 // DECSCNM reverse video
-                screen.invertDisplay(b == 'h');
+                screen->invertDisplay(b == 'h');
                 break;
             }
             break;
@@ -350,7 +348,7 @@ void Terminal::handle_esc_dispatch(uint8_t b)
             // This command fills the entire screen area with uppercase Es for
             // screen focus and alignment. This command is used by DEC manufacturing
             // and Field Service personnel.
-            screen.clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+            screen->clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
         }
         else // DECRC - Restore cursor
         {
@@ -377,7 +375,7 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
 
     // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-    screen.write(cursor_x, cursor_y, b);
+    screen->write(cursor_x, cursor_y, b);
     // Advance cursor
     cursor_x++;
 
@@ -389,11 +387,11 @@ void Terminal::handle_print(uint8_t b)
     }
     if (cursor_y > SCREEN_ROWS)
     {
-        screen.scroll(1);
+        screen->scroll(1);
         cursor_y = SCREEN_ROWS;
     }
     // Draw the cursor
-    screen.write(cursor_x, cursor_y, 178);
+    screen->write(cursor_x, cursor_y, 178);
 }
 
 void Terminal::handle_execute(uint8_t b)

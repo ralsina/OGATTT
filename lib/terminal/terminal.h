@@ -1,19 +1,16 @@
 #ifndef TERMINAL__H
 #define TERMINAL__H
-#include <SSD1306AsciiAvrI2c.h>
 #include <vtparse.h>
 
 #include "kbd.h"
+#include "screen.h"
 #include "const.h"
 
 class Terminal
 {
 public:
     Terminal(){};
-    void init(void);
-    // Yes, this wastes memory, but I don't want to 
-    // have to use things like "cursor_x-1" all the time.
-    uint8_t screen[SCREEN_COLS + 1][SCREEN_ROWS + 1];
+    void init(Keyboard kbd, Screen screen);
 
     // Cursor position (1,1 -> SCREEN_COLS, SCREEN_ROWS)
     uint8_t cursor_x = 0;
@@ -25,11 +22,10 @@ public:
     // State machine to handle terminal input from host
     vtparse_t parser;
 
-    // Screen to display things
-    SSD1306AsciiAvrI2c oled; // FIXME: maybe take as argument
-
     // Keyboard for user input
     Keyboard keyboard;
+    // Screen for display
+    Screen screen;
 
 
     // Terminal state flags. Terminal may behave
@@ -67,6 +63,9 @@ public:
 
     // Debugging convenience only
     void process_string(const char s[]);
+
+    // Config
+    bool kbd_enabled = false;
 };
 
 #endif // TERMINAL__H

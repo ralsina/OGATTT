@@ -2,15 +2,17 @@
 #include <ArduinoLog.h>
 #include <avr/pgmspace.h>
 
-#include "kbd.h"
 #include "terminal.h"
+
+#include "kbd.h"
+#include "screen.h"
 
 #define LED 13
 #define BUZZER 13
 
 void (*resetFunc)(void) = 0;
 
-void Terminal::init()
+void Terminal::init(Keyboard kbd)
 {
     // Init internal state
     cursor_x = 1;
@@ -20,6 +22,7 @@ void Terminal::init()
     kbd_tock = 0;
     serial_tock = 0;
     lnm = false;
+    keyboard = kbd;
 
     // LED is Visual Bell, BUZZER is the Bell.
     if (LED)
@@ -33,17 +36,10 @@ void Terminal::init()
     parser.num_params = 0;
     parser.ignore_flagged = 0;
 
-    // Initialize screen
-    oled.begin(&Adafruit128x64, I2C_ADDRESS);
-    oled.setFont(Adafruit5x7);
-    oled.clear();
-
-    //Clear screen buffer
-    memset(screen, 0, (SCREEN_COLS + 1) * (SCREEN_ROWS + 1));
-    refresh();
 
     // Initialize keyboard
-    keyboard.init();
+    if (kbd_enabled)
+        keyboard.init();
 }
 
 void Terminal::tick()
@@ -54,7 +50,8 @@ void Terminal::tick()
         read_serial();
         serial_tock = t;
     }
-    if (t - kbd_tock > 10000) // 10 msec
+
+    if (kbd_enabled && (t - kbd_tock > 10000)) // 10 msec
     {
         read_kbd();
         kbd_tock = t;
@@ -64,7 +61,7 @@ void Terminal::tick()
 void Terminal::read_kbd()
 {
     uint8_t kc = keyboard.get_key();
-    if ( kc != 255)
+    if (kc != 255)
     {
         Log.infoln("--> %d\r", kc);
     }
@@ -267,25 +264,25 @@ void Terminal::handle_csi_dispatch(uint8_t b)
         switch (p0)
         {
         case 0: // Clear to end of screen
-            clear(1, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
+            screen.clear(1, SCREEN_COLS, cursor_y + 1, SCREEN_ROWS);
             break;
         case 1: // Clear from start of screen
-            clear(1, SCREEN_COLS, 1, cursor_y - 1);
+            screen.clear(1, SCREEN_COLS, 1, cursor_y - 1);
             break;
         default: // 2 Clear whole screen
-            clear(1, SCREEN_COLS, 1, SCREEN_ROWS);
+            screen.clear(1, SCREEN_COLS, 1, SCREEN_ROWS);
         }     // Intentional no break
     case 'K': // EK - Erase In Line
         switch (p0)
         {
         case 0: // Clear to EOL
-            clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
+            screen.clear(cursor_x, SCREEN_COLS, cursor_y, cursor_y);
             break;
         case 1: // Clear from start of line
-            clear(1, cursor_x, cursor_y, cursor_y);
+            screen.clear(1, cursor_x, cursor_y, cursor_y);
             break;
         default: // 2  Clear whole line
-            clear(1, SCREEN_COLS, cursor_y, cursor_y);
+            screen.clear(1, SCREEN_COLS, cursor_y, cursor_y);
         }
         break;
     case 'c': // Device attributes (TODO)
@@ -302,7 +299,7 @@ void Terminal::handle_csi_dispatch(uint8_t b)
             {
             case 5:
                 // DECSCNM reverse video
-                oled.invertDisplay(b == 'h');
+                screen.invertDisplay(b == 'h');
                 break;
             }
             break;
@@ -346,7 +343,7 @@ void Terminal::handle_esc_dispatch(uint8_t b)
             // This command fills the entire screen area with uppercase Es for
             // screen focus and alignment. This command is used by DEC manufacturing
             // and Field Service personnel.
-            clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
+            screen.clear(0, SCREEN_COLS, 0, SCREEN_ROWS, 'E');
         }
         else // DECRC - Restore cursor
         {
@@ -366,20 +363,6 @@ void Terminal::handle_esc_dispatch(uint8_t b)
     }
 }
 
-void Terminal::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
-{
-    for (uint8_t x = max(x1, 1); x <= min(x2, SCREEN_COLS); x++)
-    {
-        for (uint8_t y = max(y1, 1); y <= min(y2, SCREEN_ROWS); y++)
-        {
-            screen[x][y] = c;
-        }
-    }
-    if (c)
-        refresh();
-    else
-        oled.clear((x1 - 1) * FONT_W_PX, (x2)*FONT_W_PX - 1, y1 - 1, y2 - 1);
-}
 
 void Terminal::handle_print(uint8_t b)
 {
@@ -387,9 +370,9 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
 
     // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-    oled.setCursor((cursor_x - 1) * FONT_W_PX, cursor_y);
-    oled.write(b);
-    screen[cursor_x][cursor_y] = b;
+    screen.setCursor((cursor_x - 1) * FONT_W_PX, cursor_y);
+    screen.write(b);
+    _screen[cursor_x][cursor_y] = b;
     // Advance cursor
     cursor_x += 1;
 
@@ -405,8 +388,8 @@ void Terminal::handle_print(uint8_t b)
         cursor_y = SCREEN_ROWS;
     }
     // Draw the cursor
-    oled.setCursor(cursor_x * FONT_W_PX, cursor_y);
-    oled.write(178);
+    screen.setCursor(cursor_x * FONT_W_PX, cursor_y);
+    screen.write(178);
 }
 
 void Terminal::scroll(uint8_t n)
@@ -417,31 +400,19 @@ void Terminal::scroll(uint8_t n)
         return;
     if (n >= SCREEN_ROWS)
     {
-        memset(screen, 0, SCREEN_ROWS * SCREEN_COLS);
+        memset(_screen, 0, SCREEN_ROWS * SCREEN_COLS);
         return;
     }
     for (uint8_t x = 1; x <= SCREEN_COLS; x++)
     {
-        memmove(screen[x] + 1,
-                screen[x] + n + 1,
+        memmove(_screen[x] + 1,
+                _screen[x] + n + 1,
                 SCREEN_ROWS - n);
-        memset(screen[x] + 1 + SCREEN_ROWS - n, 0, n);
+        memset(_screen[x] + 1 + SCREEN_ROWS - n, 0, n);
     }
-    refresh(); // FIXME: see if it can be made to work with oled.scrollDisplay
+    screen.refresh(); // FIXME: see if it can be made to work with screen.scrollDisplay
 }
 
-void Terminal::refresh(void)
-{
-    oled.clear();
-    for (uint8_t x = 0; x < SCREEN_COLS; x++)
-    {
-        for (uint8_t y = 0; y < SCREEN_ROWS; y++)
-        {
-            oled.setCursor(x * FONT_W_PX, y);
-            oled.write(screen[x + 1][y + 1]);
-        }
-    }
-}
 
 void Terminal::handle_execute(uint8_t b)
 {

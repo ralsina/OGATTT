@@ -1,52 +1,54 @@
-#include <Arduino.h>
+#include <ArduinoFake.h>
 #include "terminal.h"
+#include "kbd.h"
 #include <unity.h>
 
 // FIXME some tests have hardcoded screen sizes
 
 Terminal term;
+FakeKeyboard kbd;
 
 void test_screen_buffer_exists(void)
 {
     term.init();
-    TEST_ASSERT_EQUAL(0, term.screen[0][0]);
+    TEST_ASSERT_EQUAL(0, term._screen[0][0]);
 }
 
 void test_print(void)
 {
-    term.init();
+    term.init(kbd);
     // Send characters to print, see they get printed
     for (uint8_t x = 1; x < SCREEN_COLS; x++)
     {
-        TEST_ASSERT_EQUAL(0, term.screen[x][1]);
+        TEST_ASSERT_EQUAL(0, term._screen[x][1]);
         TEST_ASSERT_EQUAL(x, term.cursor_x);
         term.handle_print('a' + x);
-        TEST_ASSERT_EQUAL('a' + x, term.screen[x][1]);
+        TEST_ASSERT_EQUAL('a' + x, term._screen[x][1]);
         TEST_ASSERT_EQUAL(1, term.cursor_y);
     }
 }
 
 void test_print_follows_cursor(void)
 {
-    term.init();
+    term.init(kbd);
     term.cursor_x = 10;
     term.cursor_y = 5;
-    TEST_ASSERT_EQUAL(0, term.screen[10][5]);
+    TEST_ASSERT_EQUAL(0, term._screen[10][5]);
     term.handle_print('a');
-    TEST_ASSERT_EQUAL('a', term.screen[10][5]);
+    TEST_ASSERT_EQUAL('a', term._screen[10][5]);
     TEST_ASSERT_EQUAL(11, term.cursor_x);
 }
 
 void test_process_printable(void)
 {
-    term.init();
+    term.init(kbd);
     // Send characters to print, see they get printed
     for (uint8_t x = 1; x < SCREEN_COLS; x++)
     {
-        TEST_ASSERT_EQUAL(0, term.screen[x][1]);
+        TEST_ASSERT_EQUAL(0, term._screen[x][1]);
         TEST_ASSERT_EQUAL(x, term.cursor_x);
         term.process('a' + x);
-        TEST_ASSERT_EQUAL('a' + x, term.screen[x][1]);
+        TEST_ASSERT_EQUAL('a' + x, term._screen[x][1]);
         TEST_ASSERT_EQUAL(1, term.cursor_y);
     }
 }
@@ -55,39 +57,39 @@ void test_overflow_wraps(void)
 {
     // Printing more than SCREEN_COLS chars
     // wraps to next line
-    term.init();
+    term.init(kbd);
     for (int i = 0; i < SCREEN_COLS + 5; i++)
     {
         term.process('X');
     }
     TEST_ASSERT_EQUAL(6, term.cursor_x);
     TEST_ASSERT_EQUAL(2, term.cursor_y);
-    TEST_ASSERT_EQUAL('X', term.screen[4][1]);
+    TEST_ASSERT_EQUAL('X', term._screen[4][1]);
 }
 
 void test_scroll(void)
 {
-    term.init();
+    term.init(kbd);
     for (int i = 1; i <= SCREEN_ROWS; i++)
     {
         term.cursor_x = 1;
         term.cursor_y = i;
         term.handle_print('0' + i);
     }
-    TEST_ASSERT_EQUAL_STRING_LEN("12345678", term.screen[1] + 1, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("12345678", term._screen[1] + 1, 8);
     term.scroll(3);
-    TEST_ASSERT_EQUAL_STRING_LEN("45678", term.screen[1] + 1, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("45678", term._screen[1] + 1, 8);
     term.scroll(0);
-    TEST_ASSERT_EQUAL_STRING_LEN("45678", term.screen[1] + 1, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("45678", term._screen[1] + 1, 8);
     term.scroll(1);
-    TEST_ASSERT_EQUAL_STRING_LEN("5678", term.screen[1] + 1, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("5678", term._screen[1] + 1, 8);
     term.scroll(100);
-    TEST_ASSERT_EQUAL_STRING_LEN("", term.screen[1] + 1, 8);
+    TEST_ASSERT_EQUAL_STRING_LEN("", term._screen[1] + 1, 8);
 }
 
 void test_fill_screen(void)
 {
-    term.init();
+    term.init(kbd);
     term.clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
     // Screen filled like this (missing one char in the lower left
     // corner to avoid scrolling):
@@ -107,25 +109,25 @@ void test_fill_screen(void)
     // Compares per column
     for (int i = 1; i < SCREEN_COLS; i++)
     {
-        TEST_ASSERT_EQUAL_STRING_LEN("01234567", term.screen[i] + 1, 8);
+        TEST_ASSERT_EQUAL_STRING_LEN("01234567", term._screen[i] + 1, 8);
     }
-    TEST_ASSERT_EQUAL_STRING_LEN("0123456", term.screen[SCREEN_COLS] + 1, 7);
+    TEST_ASSERT_EQUAL_STRING_LEN("0123456", term._screen[SCREEN_COLS] + 1, 7);
 }
 
 void test_clear(void)
 {
-    term.init();
+    term.init(kbd);
     term.process_string("\x1b#8"); // Fills screen with E
     // Compares per column
     for (int i = 1; i <= SCREEN_COLS; i++)
     {
-        TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term.screen[i] + 1, 8);
+        TEST_ASSERT_EQUAL_STRING_LEN("EEEEEEEE", term._screen[i] + 1, 8);
     }
 }
 
 void test_nlm(void)
 {
-    term.init();
+    term.init(kbd);
     TEST_ASSERT_EQUAL(false, term.lnm);
     term.process_string("\033[20h");
     TEST_ASSERT_EQUAL(true, term.lnm);

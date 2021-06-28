@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include <ArduinoLog.h>
+
+#ifndef NATIVE
 #include <avr/pgmspace.h>
+#endif
 
 #include "terminal.h"
 
@@ -10,9 +13,12 @@
 #define LED 13
 #define BUZZER 13
 
+#define MAX(a,b) ((a) > (b) ? a : b)
+#define MIN(a,b) ((a) < (b) ? a : b)
+
 void (*resetFunc)(void) = 0;
 
-void Terminal::init(Keyboard kbd)
+void Terminal::init(Keyboard kbd, Screen scr)
 {
     // Init internal state
     cursor_x = 1;
@@ -23,6 +29,9 @@ void Terminal::init(Keyboard kbd)
     serial_tock = 0;
     lnm = false;
     keyboard = kbd;
+    keyboard.init();
+    screen = scr;
+    screen.init();
 
     // LED is Visual Bell, BUZZER is the Bell.
     if (LED)
@@ -38,13 +47,11 @@ void Terminal::init(Keyboard kbd)
 
 
     // Initialize keyboard
-    if (kbd_enabled)
-        keyboard.init();
 }
 
 void Terminal::tick()
 {
-    unsigned long t = max(micros(), serial_tock); // micros wraps every 70 days
+    unsigned long t = MAX(micros(), serial_tock); // micros wraps every 70 days
     if (t - serial_tock > 1000)                   // 1 msec
     {
         read_serial();
@@ -242,22 +249,22 @@ void Terminal::handle_csi_dispatch(uint8_t b)
     switch (b)
     {
     case 'A': // CUU - Cursor Up
-        cursor_y = max(0, cursor_y - max(1, p0));
+        cursor_y = MAX(0, cursor_y - MAX(1, p0));
         break;
     case 'B': // CUD - Cursor Down
-        cursor_y = min(SCREEN_ROWS, cursor_y + max(1, p0));
+        cursor_y = MIN(SCREEN_ROWS, cursor_y + MAX(1, p0));
         break;
     case 'C': // CUF - Cursor Forward
-        cursor_x = min(SCREEN_COLS, cursor_x + max(1, p0));
+        cursor_x = MIN(SCREEN_COLS, cursor_x + MAX(1, p0));
         break;
     case 'D': // CUB - Cursor Backwards
-        cursor_x = max(1, cursor_x - max(1, p0));
+        cursor_x = MAX(1, cursor_x - MAX(1, p0));
         break;
 
     case 'f': // HVP
     case 'H': // CUP – Cursor Position
-        cursor_x = min(max(p1, 1), SCREEN_COLS);
-        cursor_y = min(max(p0, 1), SCREEN_ROWS);
+        cursor_x = MIN(MAX(p1, 1), SCREEN_COLS);
+        cursor_y = MIN(MAX(p0, 1), SCREEN_ROWS);
         break;
 
     case 'J': // ED - Erase In Display
@@ -370,11 +377,9 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
 
     // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
-    screen.setCursor((cursor_x - 1) * FONT_W_PX, cursor_y);
-    screen.write(b);
-    _screen[cursor_x][cursor_y] = b;
+    screen.write(cursor_x, cursor_y, b);
     // Advance cursor
-    cursor_x += 1;
+    cursor_x++;
 
     // Wrap / Scroll
     if (cursor_x > SCREEN_COLS)
@@ -384,35 +389,12 @@ void Terminal::handle_print(uint8_t b)
     }
     if (cursor_y > SCREEN_ROWS)
     {
-        scroll(1);
+        screen.scroll(1);
         cursor_y = SCREEN_ROWS;
     }
     // Draw the cursor
-    screen.setCursor(cursor_x * FONT_W_PX, cursor_y);
-    screen.write(178);
+    screen.write(cursor_x, cursor_y, 178);
 }
-
-void Terminal::scroll(uint8_t n)
-{
-    // Scroll n rows up
-    if (n < 1)
-        // TODO Implement scroll DOWN
-        return;
-    if (n >= SCREEN_ROWS)
-    {
-        memset(_screen, 0, SCREEN_ROWS * SCREEN_COLS);
-        return;
-    }
-    for (uint8_t x = 1; x <= SCREEN_COLS; x++)
-    {
-        memmove(_screen[x] + 1,
-                _screen[x] + n + 1,
-                SCREEN_ROWS - n);
-        memset(_screen[x] + 1 + SCREEN_ROWS - n, 0, n);
-    }
-    screen.refresh(); // FIXME: see if it can be made to work with screen.scrollDisplay
-}
-
 
 void Terminal::handle_execute(uint8_t b)
 {
@@ -429,10 +411,10 @@ void Terminal::handle_execute(uint8_t b)
         delay(100);
         noTone(BUZZER);
     case 8: // BS
-        cursor_x = max(1, cursor_x - 1);
+        cursor_x = MAX(1, cursor_x - 1);
         break;
     case 9: // HT FIXME: Fixed tabs at multiples of 8
-        cursor_x = min(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS);
+        cursor_x = MIN(8 * (((cursor_x + 1) / 8) + 1), SCREEN_COLS);
     case 10: // LF
     case 11: // VT
     case 12: // FF

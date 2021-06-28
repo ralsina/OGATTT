@@ -1,12 +1,17 @@
-#include <Arduino.h>
 #include <ArduinoLog.h>
+#include <Arduino.h>
 #include "terminal.h"
 #include "kbd.h"
-#include "screen.h"
 
 Terminal term;
 Keyboard kbd;
+#ifndef NATIVE
+#include "ssd1306_screen.h"
+SSD1306Screen screen;
+#else
+#include "screen.h"
 Screen screen;
+#endif
 
 void setup()
 {

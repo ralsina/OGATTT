@@ -2,8 +2,9 @@
 #include <string.h>
 #include <stdint.h>
 
-#define MAX(a,b) ((a) > (b) ? a : b)
-#define MIN(a,b) ((a) < (b) ? a : b)
+#define MAX(a, b) ((a) > (b) ? a : b)
+#define MIN(a, b) ((a) < (b) ? a : b)
+uint8_t _screen[SCREEN_COLS + 1][SCREEN_ROWS + 1];
 
 void Screen::init()
 {
@@ -23,7 +24,12 @@ void Screen::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 
 void Screen::clear()
 {
-    clear(1, SCREEN_COLS, 1, SCREEN_ROWS, 0);
+    clear(0);
+};
+
+void Screen::clear(uint8_t c)
+{
+    clear(1, SCREEN_COLS, 1, SCREEN_ROWS, c);
 };
 
 void Screen::invertDisplay(bool invert){};

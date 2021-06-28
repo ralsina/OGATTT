@@ -3,26 +3,24 @@
 #include <stdint.h>
 #include "const.h"
 
+// Screen data. Yes, this wastes one row and one column.
+extern uint8_t _screen[SCREEN_COLS + 1][SCREEN_ROWS + 1];
 
 class Screen
 /* Works as a fake screen for tests */
 {
     public:
-    void init();
+    virtual void init();
 
-    void clear();
-    void clear(uint8_t c);
-    void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c = 0);
+    virtual void clear();
+    virtual void clear(uint8_t c);
+    virtual void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c = 0);
 
-    void refresh();
-    void invertDisplay(bool invert);
-    void setCursor(uint8_t x, uint8_t y);
-    void write(uint8_t x, uint8_t y, uint8_t b);
-    void scroll(int8_t n);
-
-    // Yes, this wastes memory, but I don't want to
-    // have to use things like "cursor_x-1" all the time.
-    uint8_t _screen[SCREEN_COLS + 1][SCREEN_ROWS + 1];
+    virtual void refresh();
+    virtual void invertDisplay(bool invert);
+    virtual void setCursor(uint8_t x, uint8_t y);
+    virtual void write(uint8_t x, uint8_t y, uint8_t b);
+    virtual void scroll(int8_t n);
 
 };
 

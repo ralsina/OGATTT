@@ -10,20 +10,16 @@ class SSD1306Screen: public Screen
 {
 public:
     SSD1306AsciiAvrI2c screen;
-    void init();
+    virtual void init();
 
-    void clear();
-    void clear(uint8_t c);
-    void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c = 0);
+    virtual void clear();
+    virtual void clear(uint8_t c);
+    virtual void clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c = 0);
 
-    void refresh();
-    void invertDisplay(bool invert);
-    void setCursor(uint8_t x, uint8_t y);
-    void write(uint8_t x, uint8_t y, uint8_t b);
-    void scroll(int8_t n);
-
-    // Yes, this wastes memory, but I don't want to
-    // have to use things like "cursor_x-1" all the time.
+    virtual void refresh();
+    virtual void invertDisplay(bool invert);
+    virtual void setCursor(uint8_t x, uint8_t y);
+    virtual void write(uint8_t x, uint8_t y, uint8_t b);
 };
 
 #endif // SDD1306SCREEN__H

@@ -6,6 +6,17 @@ void SSD1306Screen::init()
     screen.setFont(Adafruit5x7);
     Screen::init();
 };
+
+void SSD1306Screen::clear()
+{
+    Screen::clear();
+}
+
+void SSD1306Screen::clear(uint8_t c)
+{
+    Screen::clear(c);
+}
+
 void SSD1306Screen::clear(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t c)
 {
     Screen::clear(x1, x2, y1, y2, c);

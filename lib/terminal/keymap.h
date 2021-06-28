@@ -9,6 +9,8 @@ The layout will be weird because of our lack of keys (60) and the odd
 size of the rows (12). This is NOT the proper layout for a vt100, since
 it will have things like ALT and not have things like LINE FEED.
 
+Also, the VT100 had cursor as "up down left right" but that's awful?
+
 WARNING: the names of things here IS PROBABLY WRONG.
 
 These tables map the position of the key (the keycode) to

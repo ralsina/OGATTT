@@ -3,10 +3,16 @@
 #include "kbd.h"
 #include "screen.h"
 #include <unity.h>
+
+#ifdef NATIVE
+#include "screen.h"
+Screen scr;
+#else
 #include "ssd1306_screen.h"
+SSD1306Screen scr;
+#endif
 
 FakeKeyboard kbd;
-SSD1306Screen scr;
 Terminal term(&kbd, &scr);
 
 void test_screen_buffer_exists(void)

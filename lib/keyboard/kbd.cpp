@@ -1,5 +1,5 @@
-#include <ArduinoLog.h>
 #include <Arduino.h>
+#include <ArduinoLog.h>
 
 #include "kbd.h"
 

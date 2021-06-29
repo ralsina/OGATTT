@@ -1,11 +1,12 @@
 {
   "dependencies": [
     {
-      "name": "ArduinoLog"
+      "name": "ArduinoLog",
+      "platforms": ["native"]
     },
     {
       "name": "ArduinoFake",
-      "platforms": "native"
+      "platforms": ["native"]
     }
   ]
 }

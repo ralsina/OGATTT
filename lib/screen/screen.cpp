@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <ArduinoLog.h>
 #include "screen.h"
 #include <string.h>

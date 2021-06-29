@@ -1,5 +1,5 @@
-#include <ArduinoLog.h>
 #include <Arduino.h>
+#include <ArduinoLog.h>
 #include "terminal.h"
 #include "kbd.h"
 #include "ssd1306_screen.h"

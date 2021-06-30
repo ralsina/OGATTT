@@ -42,7 +42,7 @@ void SSD1306Screen::refresh(void)
         for (uint8_t y = 0; y < SCREEN_ROWS; y++)
         {
             screen.setCursor(x * FONT_W_PX, y);
-            screen.write(_screen[x + 1][y + 1]);
+            screen.write(_screen[x + 1][y + 1] ? _screen[x + 1][y + 1] : ' ');
         }
     }
 }
@@ -50,7 +50,7 @@ void SSD1306Screen::refresh(void)
 void SSD1306Screen::write(uint8_t x, uint8_t y, uint8_t b)
 {
     setCursor(x, y);
-    screen.write(b);
+    screen.write(b ? b : ' ');
     Screen::write(x, y, b);
 }
 

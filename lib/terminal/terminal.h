@@ -9,7 +9,7 @@
 class Terminal
 {
 public:
-    Terminal(Keyboard *kbd,Screen * scr)
+    Terminal(Keyboard *kbd, Screen *scr)
     {
         keyboard = kbd;
         screen = scr;
@@ -34,17 +34,20 @@ public:
     // Terminal state flags. Terminal may behave
     // differently based on these flags
 
-    bool lnm = false; // false is "reset/line feed"
-                      // true is "set/new line"
+    bool lnm = false;       // false is "reset/line feed"
+                            // true is "set/new line"
+    bool cursor_on = false; // Cursor blinks on/off
 
     // Timer that checks input/output and reacts to events
     void tick(void);
     unsigned long kbd_tock = 0;
     unsigned long serial_tock = 0;
+    unsigned long cursor_tock = 0;
 
-    // Input handlers
+    // Time-triggered callbacks
     void read_kbd();
     void read_serial();
+    void cursor_blink();
 
     // State machine handlers
     void process(uint8_t c);

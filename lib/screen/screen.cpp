@@ -40,8 +40,13 @@ void Screen::invertDisplay(bool invert){};
 void Screen::refresh(void){};
 
 void Screen::write(uint8_t x, uint8_t y, uint8_t b)
-{
-    _screen[x][y] = b;
+{   
+    /* This class doesn't implement actual writing on the display,
+    child class should. */
+    if (!b) // Blank that position
+    {
+        clear(x, x, y, y);
+    }
 }
 
 void Screen::setCursor(uint8_t x, uint8_t y){};

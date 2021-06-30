@@ -28,6 +28,7 @@ void Terminal::init()
     kbd_tock = 0;
     serial_tock = 0;
     lnm = false;
+    cursor_on = false;
     keyboard->init();
     screen->init();
 
@@ -61,6 +62,29 @@ void Terminal::tick()
         read_kbd();
         kbd_tock = t;
     }
+
+    if (t - cursor_tock > 500000) // half a second
+    {
+        cursor_blink();
+        cursor_tock = t;
+    }
+}
+
+void Terminal::cursor_blink()
+{
+    // Since the screen doesn't clear a character when displaying it, we can just
+    // Draw a _ to blink ON, and the screen character to blink OFF
+    if (cursor_on)
+    {
+        cursor_on = false;
+        screen->write(cursor_x, cursor_y, 178);
+    }
+    
+    else{
+        cursor_on = true;
+        screen->write(cursor_x, cursor_y, _screen[cursor_x][cursor_y]);
+    }
+
 }
 
 void Terminal::read_kbd()
@@ -375,6 +399,7 @@ void Terminal::handle_print(uint8_t b)
     // https://vt100.net/docs/vt100-ug/chapter3.html
 
     // display.fillRect(cursor_x * FONT_W_PX, cursor_y * 8, FONT_W_PX, 8, 0);
+    _screen[cursor_x][cursor_y] = b;
     screen->write(cursor_x, cursor_y, b);
     // Advance cursor
     cursor_x++;
@@ -390,8 +415,6 @@ void Terminal::handle_print(uint8_t b)
         screen->scroll(1);
         cursor_y = SCREEN_ROWS;
     }
-    // Draw the cursor
-    screen->write(cursor_x, cursor_y, 178);
 }
 
 void Terminal::handle_execute(uint8_t b)

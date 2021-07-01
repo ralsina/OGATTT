@@ -70,7 +70,7 @@ public:
     void process_string(const char s[]);
 
     // Config
-    bool kbd_enabled = false;
+    bool kbd_enabled = true;
 };
 
 #endif // TERMINAL__H

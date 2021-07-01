@@ -9,12 +9,13 @@
 
 #include "kbd.h"
 #include "screen.h"
+#include "keymap.h"
 
 #define LED 13
 #define BUZZER 13
 
-#define MAX(a,b) ((a) > (b) ? a : b)
-#define MIN(a,b) ((a) < (b) ? a : b)
+#define MAX(a, b) ((a) > (b) ? a : b)
+#define MIN(a, b) ((a) < (b) ? a : b)
 
 void (*resetFunc)(void) = 0;
 
@@ -43,7 +44,6 @@ void Terminal::init()
     parser.num_intermediate_chars = 0;
     parser.num_params = 0;
     parser.ignore_flagged = 0;
-
 
     // Initialize keyboard
 }
@@ -79,12 +79,12 @@ void Terminal::cursor_blink()
         cursor_on = false;
         screen->write(cursor_x, cursor_y, 178);
     }
-    
-    else{
+
+    else
+    {
         cursor_on = true;
         screen->write(cursor_x, cursor_y, _screen[cursor_x][cursor_y]);
     }
-
 }
 
 void Terminal::read_kbd()
@@ -92,7 +92,9 @@ void Terminal::read_kbd()
     uint8_t kc = keyboard->get_key();
     if (kc != 255)
     {
-        Log.infoln("--> %d\r", kc);
+        uint8_t r = kc / 16;
+        uint8_t c = kc % 16;
+        process(plain[12 * r + c]);
     }
 }
 
@@ -391,7 +393,6 @@ void Terminal::handle_esc_dispatch(uint8_t b)
         Log.infoln("Unknown ESC_DISPATCH character %c\r", b);
     }
 }
-
 
 void Terminal::handle_print(uint8_t b)
 {

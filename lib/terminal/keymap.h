@@ -33,7 +33,7 @@ Modifiers are: */
 #define DOWN 206
 
 /* First table is plain symbols, what the key represents with no
-modifiers */
+modifiers. Also, this needs rearraging of course :-) */
 
 const uint8_t plain[]{
     /* ROW 0  */ 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 8,   // - = moved to row 4

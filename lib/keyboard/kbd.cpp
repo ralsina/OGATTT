@@ -7,9 +7,10 @@
 #define KBD_ROWS 5
 
 // Actual wiring
-uint8_t kbd_cols[] = {2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 16, 17};
+uint8_t kbd_cols[] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14};
 
-uint8_t kbd_rows[] = {15, 14, 20, 4, 21};
+// uint8_t kbd_rows[] = {15, 16, 17, 20, 21};
+uint8_t kbd_rows[] = {21, 20, 17, 16, 15};  // I wired them backwards. ¯\_(ツ)_/¯
 
 #define KEYCODE(r, c) (c + r * 16)
 

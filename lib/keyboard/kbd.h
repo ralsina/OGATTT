@@ -8,7 +8,7 @@ class Keyboard
 public:
     Keyboard(){};
     void init(void);
-    uint8_t get_key(void);
+    virtual uint8_t get_key(void);
 
     // Time between 1st press and 1st repeat (half a second)
     unsigned long initial_delay = 500000;
@@ -21,9 +21,10 @@ public:
 };
 
 // Test fake
-class FakeKeyboard : public Keyboard
-{
-    uint8_t get_key(void) { return 255; };
-};
+// class FakeKeyboard : public Keyboard
+// {
+//     public:
+//     virtual uint8_t get_key(void) { return 255; };
+// };
 
 #endif // KBD__H

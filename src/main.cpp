@@ -27,7 +27,11 @@ void setup()
 
 }
 
+// uint8_t c;
+
 void loop()
 {
   term.tick();
+  // term.process(c++);
+  // delay(100);
 }

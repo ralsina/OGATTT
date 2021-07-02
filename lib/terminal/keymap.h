@@ -38,8 +38,8 @@ modifiers. Also, this needs rearraging of course :-) */
 const uint8_t plain[]{
     /* ROW 0  */ 27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 8,   // - = moved to row 4
     /* ROW 1   */ 9, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 127, // [ ] moved to row 4, \ moved to row 3
-    /* ROW 2 */ 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', 13,
+    /* ROW 2 */ 202, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', 13, // ' moved row 4
     /* ROW 3 */ 200, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\\',
-    /* ROW 4 */ 201, 202, '[', ']', '-', '=', ' ', ' ', LEFT, UP, DOWN, RIGHT};
+    /* ROW 4 */ 201, 39, '[', ']', '-', '=', ' ', ' ', LEFT, UP, DOWN, RIGHT}; // 39 is '
 
 #endif // KEYMAP_H

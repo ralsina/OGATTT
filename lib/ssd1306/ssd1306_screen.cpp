@@ -6,7 +6,7 @@ void SSD1306Screen::init()
     Log.infoln("SSD1306::init\r");
 
     screen.begin(&Adafruit128x64, I2C_ADDRESS);
-    screen.setFont(Adafruit5x7);
+    screen.setFont(Iain5x7);
     Screen::init();
 };
 
